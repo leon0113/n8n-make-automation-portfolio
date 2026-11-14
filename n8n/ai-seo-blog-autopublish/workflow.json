@@ -1,0 +1,482 @@
+{
+  "name": "AI SEO Blog Writer & Auto-Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "4b1e3dd5-4197-49c2-8e52-c0a65606d628",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        8320,
+        1808
+      ],
+      "notes": "Runs every Monday at 9 AM. Update via the admin dashboard Automation section."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seo-blog-execute",
+        "options": {}
+      },
+      "id": "c6747315-0d87-466e-b7cf-03122aa70093",
+      "name": "Execute Now Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        8320,
+        1968
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "notes": "Triggered by the admin dashboard 'Run Now' button via POST /api/v1/n8n/execute. URL: {n8n-url}/webhook/seo-blog-execute"
+    },
+    {
+      "parameters": {
+        "url": "=https://contoso-realty.example.com/api/v1/blog-keywords/next?api_key={{BLOG_API_KEY}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "62f1264a-e730-4d80-9933-8d1dae61e7be",
+      "name": "Fetch Next Keyword",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8544,
+        1808
+      ],
+      "notes": "GET /api/v1/blog-keywords/next — returns the highest-priority pending keyword and marks it in_progress. Returns { no_work: true } when queue is empty."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-work-check",
+              "leftValue": "={{ $json.data.no_work }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "24f6ed26-b51c-4a54-947d-cdf865ee1760",
+      "name": "Has Pending Keyword?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8768,
+        1808
+      ],
+      "notes": "Stops workflow gracefully if no pending keywords remain."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalise keyword data from our API response\nconst resp = $input.first().json;\nconst kw = resp.data;\nreturn [{\n  json: {\n    no_work: kw.no_work || false,\n    _id: kw._id,\n    keyword: String(kw.keyword || '').trim(),\n    lsi_keywords: kw.lsi_keywords || '',\n    target_word_count: parseInt(kw.target_word_count) || 1500,\n    intent: kw.intent || 'Informational',\n    cluster: kw.cluster || '',\n    priority: kw.priority,\n    image_alt_text: String(kw.image_alt_text || '').trim()\n  }\n}];"
+      },
+      "id": "48c4aa8c-2e0d-4668-9644-252bad9bd7ee",
+      "name": "Normalise Keyword",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8992,
+        1808
+      ],
+      "notes": "Extracts and normalises keyword fields from the API response for downstream nodes."
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a senior SEO editor writing production-ready content for a live website.\n\nWrite approximately {{ $json.target_word_count }} words (stay within ±10% of that target) for the primary keyword: \"{{ $json.keyword }}\".\n\nQUALITY AND TRUST (E-E-A-T):\n- Sound authoritative and precise; avoid vague claims and invented statistics\n- Prefer concrete examples, checklists, and clear definitions over filler\n- If you mention tools, standards, or regulations, name them accurately; do not fabricate citations or URLs\n\nSEO AND STRUCTURE:\n- One clear H1 containing the keyword; use the keyword in the first 100 words and in at least 3 H2s where it reads naturally\n- Weave in these LSI terms where relevant (do not keyword-stuff): {{ $json.lsi_keywords }}\n- Match search intent: {{ $json.intent }}; topic cluster context: {{ $json.cluster }}\n- Use a logical H2/H3 outline; keep paragraphs short (2–3 sentences) for readability\n- Include one comparison table OR one numbered step list with real utility\n- Add an H2 \"Frequently Asked Questions\" with 3–5 items: each question as h3, answer as following p\n- End with a decisive call to action (what the reader should do next)\n\nSTYLE:\n- No emoji; no AI clichés (\"in today's fast-paced world\", \"in conclusion\", \"delve\", \"landscape\", \"unlock\")\n- Active voice, second person \"you\" where appropriate\n- Output only valid, semantic HTML: h1, h2, h3, p, ul, ol, li, table, thead, tbody, tr, th, td, strong, em\n- Do not wrap the HTML in markdown code fences (no ``` or ```html). No commentary before or after the HTML\n- The article body must stay on-topic for the target keyword only\n\nBRAND VOICE:\nAuthoritative, clear, and reader-first. Practical over promotional; minimal jargon; explain terms when needed.\n\nOutput only the HTML article."
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 6000,
+          "temperature": 0.55
+        }
+      },
+      "id": "ce14b042-5f89-417f-95fc-b62734ae47fe",
+      "name": "Generate Article",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        9152,
+        1808
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "First AI pass: writes the full SEO blog post."
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ \"Based on the article below, generate a JSON object with EXACTLY these keys: meta_title, meta_description, slug, featured_image_alt, image_search_query, excerpt.\\n\\nRules: meta_title <= 60 chars, same topic as the article H1, title case. meta_description 150-160 chars, one soft CTA. slug lowercase hyphens, <= 60 chars. featured_image_alt <= 125 chars for screen readers. image_search_query 4-7 words, literal photo scene. excerpt <= 200 chars, plain text, no HTML.\\n\\nNever put automation tool names, n8n, workflow, or the words Pick / Next / Keyword together as a prefix in any field value.\\n\\nPRIMARY KEYWORD (use naturally in SEO fields only):\\n\" + String($('Normalise Keyword').first().json.keyword || '') + \"\\n\\nARTICLE:\\n\" + String($json.message.content || '') + \"\\n\\nReturn ONLY valid JSON. No preamble. No markdown fences.\" }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "maxTokens": 650,
+          "temperature": 0.25
+        }
+      },
+      "id": "98b19161-9409-416e-a37e-dd19b1c009c0",
+      "name": "Generate SEO Meta",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        9440,
+        1808
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "Second AI pass: generates meta title, description, slug, alt text using gpt-4o-mini."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge article HTML + SEO metadata into one object\nconst article = $('Generate Article').first().json.message.content;\nconst seoContent = $json.message.content;\nconst keyword = $('Normalise Keyword').first().json.keyword;\nconst keywordId = $('Normalise Keyword').first().json._id;\nconst sheetImageAlt = String($('Normalise Keyword').first().json.image_alt_text || '').trim();\n\nlet seo;\ntry {\n  if (typeof seoContent === 'object' && seoContent !== null) {\n    seo = seoContent;\n  } else {\n    const cleaned = String(seoContent).replace(/```json|```/g, '').trim();\n    seo = JSON.parse(cleaned);\n  }\n} catch (e) {\n  const kw = keyword || 'blog-post';\n  seo = {\n    meta_title: kw.substring(0, 60),\n    meta_description: `Learn about ${kw}. A complete guide.`.substring(0, 160),\n    slug: kw.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 60),\n    featured_image_alt: kw,\n    image_search_query: kw,\n    excerpt: kw\n  };\n}\n\nfunction stripMarkdownFencesFromHtml(raw) {\n  let html = String(raw || '').trim();\n  if (html.charCodeAt(0) === 0xfeff) html = html.slice(1).trim();\n  for (let i = 0; i < 8; i++) {\n    const before = html;\n    html = html.replace(/^[\"'`\\s]+/, '').replace(/^```+[a-zA-Z0-9_-]*\\s*/m, '').trim();\n    if (html === before) break;\n  }\n  for (let i = 0; i < 8; i++) {\n    const before = html;\n    html = html.replace(/\\s*```+\\s*$/m, '').trim();\n    if (html === before) break;\n  }\n  return html;\n}\n\nfunction stripLeakedLabel(s) {\n  return String(s || '')\n    .replace(/^pick next keyword\\s*:\\s*/i, '')\n    .replace(/^keyword\\s*:\\s*/i, '')\n    .trim();\n}\nseo.meta_title = stripLeakedLabel(seo.meta_title);\n\nreturn [{\n  json: {\n    article_html: stripMarkdownFencesFromHtml(article),\n    meta_title: seo.meta_title,\n    meta_description: seo.meta_description,\n    slug: seo.slug,\n    image_search_query: seo.image_search_query,\n    excerpt: seo.excerpt,\n    keyword: keyword,\n    keyword_id: keywordId,\n    featured_image_alt: (sheetImageAlt || String(seo.featured_image_alt || '').trim() || keyword).slice(0, 500)\n  }\n}];"
+      },
+      "id": "64b1da75-f93b-436e-87e9-39770bd9b27f",
+      "name": "Merge Article + Meta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9728,
+        1808
+      ],
+      "notes": "Combines article HTML and SEO JSON into one payload for downstream nodes."
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pexels.com/v1/search?query={{ encodeURIComponent($json.image_search_query) }}&per_page=1&orientation=landscape&size=large",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{PEXELS_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "582f5634-bfda-4820-b211-cebdb1ff2255",
+      "name": "Fetch Pexels Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9888,
+        1808
+      ],
+      "notes": "Free Pexels API. Move the key to n8n Credentials for security."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pick highest-res Pexels URL and pass it through with all article data\nconst fetch = $input.first().json;\nconst merge = $('Merge Article + Meta').first().json;\nconst photo = fetch.photos && fetch.photos[0];\nconst src = photo && photo.src;\nconst url = src && (src.original || src.large2x || src.large || src.medium || src.small) || '';\nif (!url) {\n  throw new Error('No Pexels image found for query: ' + (merge.image_search_query || merge.keyword));\n}\nreturn [{\n  json: {\n    ...merge,\n    featured_image_url: url,\n    pexels_photo_id: photo ? photo.id : null\n  }\n}];"
+      },
+      "id": "802fe2dc-c085-4260-b870-389523fcc3da",
+      "name": "Pick Best Thumbnail URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10112,
+        1808
+      ],
+      "notes": "Uses original/large2x when available so images are sharp on retina. Stores the URL directly — no upload step needed."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the final payload for the blog API\nconst d = $input.first().json;\n\nfunction stripMarkdownFencesFromHtml(raw) {\n  let html = String(raw || '').trim();\n  if (html.charCodeAt(0) === 0xfeff) html = html.slice(1).trim();\n  for (let i = 0; i < 8; i++) {\n    const before = html;\n    html = html.replace(/^[\"'`\\s]+/, '').replace(/^```+[a-zA-Z0-9_-]*\\s*/m, '').trim();\n    if (html === before) break;\n  }\n  for (let i = 0; i < 8; i++) {\n    const before = html;\n    html = html.replace(/\\s*```+\\s*$/m, '').trim();\n    if (html === before) break;\n  }\n  return html;\n}\n\nconst heroImg = d.featured_image_url\n  ? `<figure class='wp-block-image n8n-hero-thumb'><img src='${d.featured_image_url.replace(/'/g, \"&#39;\")}' alt='${(d.featured_image_alt || '').replace(/'/g, \"&#39;\")}' loading='lazy' decoding='async' /></figure>\\n\\n`\n  : '';\n\nreturn [{\n  json: {\n    title: d.meta_title,\n    slug: d.slug || '',\n    content: heroImg + stripMarkdownFencesFromHtml(d.article_html),\n    excerpt: d.excerpt || '',\n    meta_title: d.meta_title || '',\n    meta_description: d.meta_description || '',\n    keyword: d.keyword || '',\n    keyword_ref: d.keyword_id || '',\n    featured_image_url: d.featured_image_url || '',\n    featured_image_alt: d.featured_image_alt || ''\n  }\n}];"
+      },
+      "id": "3c936bbe-f055-43f9-a52e-4c7fc199469b",
+      "name": "Prepare Post Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10336,
+        1808
+      ],
+      "notes": "Strips markdown fences, prepends hero img tag, and builds the JSON body for POST /api/v1/blogs."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://contoso-realty.example.com/api/v1/blogs?api_key={{BLOG_API_KEY}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "a73bc77c-b23b-45a2-b182-19fe72b1e51d",
+      "name": "Create Draft Blog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10560,
+        1808
+      ],
+      "notes": "POST /api/v1/blogs with x-api-key header. Creates a draft post you can review and publish in the dashboard."
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://contoso-realty.example.com/api/v1/blog-keywords/' + $('Normalise Keyword').first().json._id + '/complete?api_key={{BLOG_API_KEY}}' }}",
+        "options": {}
+      },
+      "id": "6f812b4c-ecbf-406f-97a5-badf102b1a49",
+      "name": "Mark Keyword Published",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10784,
+        1808
+      ],
+      "notes": "PATCH /api/v1/blog-keywords/:id/complete — marks the keyword as 'published' so it won't be picked again."
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "https://app.slack.com/client/{{SLACK_TEAM_ID}}/{{CHANNEL_ID}}",
+          "mode": "url"
+        },
+        "text": "=:pencil2: *New draft blog ready for review*\n\n*Keyword:* {{ $('Normalise Keyword').first().json.keyword }}\n*Title:* {{ $('Prepare Post Data').item.json.title }}\n*Slug:* /blogs/{{ $('Prepare Post Data').item.json.slug }}\n\n:white_check_mark: *Review and publish in dashboard:*\nYOUR_FRONTEND_URL/dashboard\n\nBlog post ID: {{ $('Create Draft Blog').item.json.data._id }}",
+        "otherOptions": {}
+      },
+      "id": "37d4275a-811d-4592-baf1-b06abf60f077",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        11008,
+        1808
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      },
+      "notes": "Slack notification with a link to the dashboard. Replace YOUR_FRONTEND_URL."
+    }
+  ],
+  "connections": {
+    "Weekly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Next Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Now Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch Next Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Next Keyword": {
+      "main": [
+        [
+          {
+            "node": "Has Pending Keyword?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Pending Keyword?": {
+      "main": [
+        [
+          {
+            "node": "Normalise Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalise Keyword": {
+      "main": [
+        [
+          {
+            "node": "Generate Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Article": {
+      "main": [
+        [
+          {
+            "node": "Generate SEO Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SEO Meta": {
+      "main": [
+        [
+          {
+            "node": "Merge Article + Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Article + Meta": {
+      "main": [
+        [
+          {
+            "node": "Fetch Pexels Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Pexels Image": {
+      "main": [
+        [
+          {
+            "node": "Pick Best Thumbnail URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Best Thumbnail URL": {
+      "main": [
+        [
+          {
+            "node": "Prepare Post Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Post Data": {
+      "main": [
+        [
+          {
+            "node": "Create Draft Blog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft Blog": {
+      "main": [
+        [
+          {
+            "node": "Mark Keyword Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Keyword Published": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
