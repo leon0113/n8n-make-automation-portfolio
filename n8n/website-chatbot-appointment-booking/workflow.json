@@ -1,0 +1,545 @@
+{
+  "name": "AI Website Chatbot with Appointment Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.sessionId }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -592,
+        432
+      ],
+      "id": "aa3604c2-636a-45bd-ae5f-826768970ea7",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "372c34b2-e4da-49fe-bc8a-83fe294b6bd8",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "BOOK",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -624,
+        144
+      ],
+      "id": "09276414-78bf-4580-930e-b39e3e3fba0d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Responsible to retrieve all available free appointment slots from database.",
+        "url": "https://api.cal.com/v2/slots",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n  \"start\": \"{startTime}\",\n  \"end\": \"{endTime}\",\n  \"eventTypeId\": {{ $('Set credentials').item.json.cal_event_type_id }},\n  \"timeZone\": \"{{ $('Set credentials').item.json.timezone }}\"\n}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('Set credentials').item.json.cal_api_key }}\",\n  \"cal-api-version\": \"2024-09-04\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "startTime",
+              "description": "Start date string from which to fetch slots, formatted in ISO 8601 and in the UTC timezone. The time should always start at 00:00:00",
+              "type": "string"
+            },
+            {
+              "name": "endTime",
+              "description": "End date string up to which slots should be fetched, formatted in ISO 8601 and in the UTC timezone. The time should always end at 23:59:59",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "255f4144-0b9f-4e2b-a0ce-1d59a70800ef",
+      "name": "retrieve_available_free_slots_from_database"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Responsible for saving appointment into the database.",
+        "method": "POST",
+        "url": "https://api.cal.com/v2/bookings",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n  \"apiKey\": \"{{ $('Set credentials').item.json.cal_api_key }}\"\n}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $('Set credentials').item.json.cal_api_key }}\",\n  \"cal-api-version\": \"2024-08-13\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"start\": \"{startTime}\",\n  \"eventTypeId\": {{ $('Set credentials').item.json.cal_event_type_id }},\n  \"attendee\": {\n    \"name\": \"{userName}\",\n    \"email\": \"{userEmail}\",\n    \"timeZone\": \"{{ $('Set credentials').item.json.timezone }}\",\n    \"language\": \"en\"\n  },\n  \"location\": {\n    \"type\": \"integration\",\n    \"integration\": \"cal-video\"\n  },\n  \"metadata\": {}\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "startTime",
+              "description": "Start date string of the appointment picked by user, formatted in ISO 8601 and in the UTC timezone (available inside tool response)",
+              "type": "string"
+            },
+            {
+              "name": "userName",
+              "description": "Full name of the user",
+              "type": "string"
+            },
+            {
+              "name": "userEmail",
+              "description": "Email of the user"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        64
+      ],
+      "id": "31908548-da3d-4b84-96a6-28bd1115da15",
+      "name": "book_appointment"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.chatInput }}",
+        "options": {
+          "systemMessage": "=You are an expert intent detection system for an appointment booking workflow. Your task is to analyze the full conversation history between the user and the appointment representative, and based on the user's latest message and the ongoing context, determine the user's intent.\n\nPast conversation with this visitor (oldest → newest, may be empty for a new visitor):\n{{ $('Format History').item.json.transcript }}\n\nUse it to maintain continuity: never re-greet a returning visitor and never re-ask for details already given.\n\n\nIntent Categories:\n\n- BOOK:\nThe user is initiating a new appointment, requesting to check available slots, providing details for a new booking, clarifying or correcting information for an appointment in progress, or updating/modifying any appointment details (such as name, email, date, or time) before the booking is finalized.\n\nThis includes any requests to check, view, or book available slots for a specific time of day, such as \"morning,\" \"afternoon,\" \"evening,\" \"noon,\" \"midday,\" or \"lunchtime.\"\n\n- CONVERSATION:\nThe user is engaging in general conversation unrelated to booking.\nThis includes:\n- FAQs\n- General questions\n- Questions about services\n- Pricing details\n- Business information\n- Casual or off-topic conversation\n- Clarifications that are NOT about booking an appointment\n\nRules:\n- Always prioritize the user's latest message, but use the entire conversation history to understand the current context and whether an appointment workflow is in progress.\n- Treat any user message that provides, clarifies, or changes appointment details (such as rescheduling, changing time, updating name/email/date/time, or correcting previous info) as BOOK.\n- If the user asks about available slots for any specific time of day—including \"noon,\" \"midday,\" \"lunchtime,\" \"morning,\" \"afternoon,\" or \"evening\"—treat this as booking intent and respond with BOOK.\n- If the user clearly shifts away from appointment-related tasks or discusses unrelated topics, respond with CONVERSATION.\n- If intent is ambiguous but the conversation is in the middle of an appointment workflow, default to BOOK to avoid disrupting the booking process.\n- If the user asks about existing or upcoming appointments, and the system only supports new bookings, respond with CONVERSATION.\n- Do not guess or infer booking intent unless the user explicitly suggests it or the context clearly shows an ongoing booking flow.\n- Your output must be exactly one word: BOOK or CONVERSATION. No other text.\n\nExamples:\n\nBooking-related:\n- User: \"Any in the noon?\" → BOOK\n- User: \"I want to check for noon slots.\" → BOOK\n- User: \"What time slots are available on Friday?\" → BOOK\n- User: \"Can I change my appointment from morning to noon?\" → BOOK\n- User: \"Book a call for tomorrow evening\" → BOOK\n\nConversation-related:\n- User: \"By the way, do you know any good restaurants?\" → CONVERSATION\n- User: \"Wanna know pricing\" → CONVERSATION\n- User: \"Can you tell me your pricing details?\" → CONVERSATION\n- User: \"What services do you offer?\" → CONVERSATION\n- User: \"Wanna know service\" → CONVERSATION\n- User: \"How does this work?\" → CONVERSATION\n- User: \"Is there any discount?\" → CONVERSATION\n\nYour output must be a single word:\nBOOK or CONVERSATION\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -960,
+        144
+      ],
+      "id": "986f842a-b79d-4f2a-ad7d-2d18e957228f",
+      "name": "Router Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.chatInput }}",
+        "options": {
+          "systemMessage": "=You are Contoso Realty's appointment-booking assistant. You help website visitors connect with one of our agents — typically for a property viewing, buyer or seller consultation, or home valuation.\n\nPast conversation with this visitor (oldest → newest, may be empty for a new visitor):\n{{ $('Format History').item.json.transcript }}\n\nUse it to maintain continuity: never re-greet a returning visitor and never re-ask for details already given.\n\nGoal: understand what the visitor needs, collect their name, email, AND phone number, and share the booking link so they can pick a time that works for them.\n\n==================================================\nBOOKING LINK\n==================================================\nAlways share this link when the visitor wants to book, schedule, meet, or speak with an agent — but ONLY after name, email, and phone have all been collected:\n\nhttps://calendly.com/{{CALENDLY_SLUG}}/30min\n\n==================================================\nCONVERSATION FLOW\n==================================================\n1. Acknowledge information the visitor has already provided. Don't re-ask.\n2. If the visitor expresses any positive intent (wants to book, meet, view a property, get a valuation, talk to an agent, etc.), collect their details one at a time IN THIS ORDER:\n   a. Name first\n   b. Then email\n   c. Then phone number\n   Do not skip ahead — ask for each one only after the previous has been provided.\n3. Only AFTER all three (name, email, phone) are collected, share the booking link in a warm, concise message. Example:\n   \"Thanks, [name]. You can pick a time that works for you here: https://calendly.com/{{CALENDLY_SLUG}}/30min — our agent will see your booking and reach out to confirm.\"\n4. If the visitor is just browsing or asking general questions, answer helpfully. Do NOT share the booking link until name, email, and phone are all collected.\n5. Validate emails: must contain \"@\" and a domain. Re-ask politely if invalid.\n6. Validate phone: must be a reasonable digit-based number (at least 7 digits after stripping formatting). Re-ask politely if invalid.\n7. Be warm, concise, professional. Plain prose only — no Markdown headings or asterisks INSIDE the reply text.\n\n==================================================\nDATA EXTRACTION RULES — RUN ON EVERY TURN\n==================================================\nRe-evaluate every field every single message. Extract from this turn AND from anything earlier in the conversation. If a field was already collected and the visitor hasn't changed it, repeat the prior value so it isn't lost.\n\n- name        — Full name as the visitor stated it (e.g. \"John Smith\"). Empty string if not yet given.\n- email       — A valid email address (must contain @ and a domain). Empty string if not yet given.\n- phone       — Digits-only phone number (e.g. \"5555550123\"). Empty string if not yet given.\n- address     — Street + city + postal code, only when the visitor mentions a property address (e.g. for a viewing or valuation). Empty string otherwise.\n- summary     — Brief summary of the whole conversation. Cover: what they want, what info has been collected (name / email / phone / address), whether the booking link was shared, how interested they are, any blocker, and the next step. Update on every turn. This must be in detailed.\n\n==================================================\nINTEREST CLASSIFICATION (the `interested` field)\n==================================================\nThe `interested` field is ONLY set to \"yes\" once ALL THREE of name, email, and phone have been successfully collected from the visitor. Intent alone is NOT enough — the contact details must be captured first.\n\nSet \"yes\" ONLY when:\n- name is a non-empty valid full name, AND\n- email is a non-empty valid email (contains @ and a domain), AND\n- phone is a non-empty valid phone number (digit-based, reasonable length)\n\nSet \"pending\" when:\n- The visitor has expressed interest (wants to book, meet, view, get valuation, talk to an agent, etc.) but one or more of name/email/phone is still missing or invalid\n- The visitor is browsing, asking general questions, or hasn't decided yet\n- Any other state where the three required fields aren't all collected\n\nSet \"no\" only when the visitor EXPLICITLY says they aren't interested, declines to share info, or says \"not now\" / \"stop\" / \"no thanks\" / \"I was just looking\" / \"I changed my mind\" / etc.\n\nOnce \"interested\" is set to \"yes\" (all three fields collected), it MUST stay \"yes\" on every subsequent turn. Never downgrade back to \"pending\" or \"no\" unless the visitor explicitly opts out.\n\n==================================================\nOUTPUT FORMAT — STRICT\n==================================================\nYou MUST return a single valid JSON object containing ALL of these keys, every single turn, no exceptions:\n\n{\n  \"output\": \"string — your reply to the visitor\",\n  \"name\": \"string — empty if not yet collected\",\n  \"email\": \"string — empty if not yet collected\",\n  \"phone\": \"string — empty if not yet collected\",\n  \"address\": \"string — empty if not yet collected\",\n  \"interested\": \"yes | no | pending\",\n  \"summary\": \"Brief summary of the whole conversation. Cover: what they want, what info has been collected (name / email / phone / address), whether the booking link was shared, how interested they are, any blocker, and the next step. Update on every turn. This must be in detailed.\"\n}\n\nRULES:\n- Return ALL 7 keys every turn, even if values are empty strings.\n- Never omit a key. Never return a partial object.\n- Never wrap the JSON in Markdown fences or prose.\n- If a field was collected on a previous turn, REPEAT that exact value — do not blank it out.\n- The visitor only sees the `output` field. All other fields are stored in the CRM.\n\nEmpty strings are fine when a field hasn't been collected yet. If a field was previously known, repeat the prior value so it isn't wiped from the database.\n\nToday's date and time: '{{ $('Set credentials').item.json.currentDateTime }}'"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -336,
+        -128
+      ],
+      "id": "a83a0b80-6c85-42ce-abc8-3fbf9ecc5b5a",
+      "name": "Appointment Booking Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.chatInput }}",
+        "options": {
+          "systemMessage": "=You are Contoso Realty's friendly website assistant. Help visitors with questions about our brokerage, our listings, and how to use the website.\n\nPast conversation with this visitor (oldest → newest, may be empty for a new visitor):\n{{ $('Format History').item.json.transcript }}\n\nUse it to maintain continuity: never re-greet a returning visitor and never re-ask for details already given.\n\nAbout Contoso Realty:\n- Independent real estate brokerage based in Springfield\n- Two offices:\n  • Main Branch — 100 Main Street, Suite 100, Springfield, ST 00000\n  • Downtown Branch — 200 Market Street, Suite 200, Springfield, ST 00000\n- Phone: +1 (555) 555-0142\n- Email: info@example.com\n- Website: https://contoso-realty.example.com\n- Service area: Springfield and the surrounding metro area, with MLS listings across the region\n\nWhat we do:\n- Residential, condo, and commercial sales\n- Buyer representation, home-buying advice\n- Seller representation, home valuations, listing services\n- Open houses and pre-construction\n- Agent recruitment — direct interested agents to /join-us\n\nWebsite features visitors may ask about:\n- Browse listings at /listings/all (or /residential, /condo, /commercial, /open-houses, /pre-construction)\n- Search by address, MLS number, city, or postal code\n- Save properties to a default \"Wishlist\" folder or any custom folder via the heart icon. Folders live in /profile after sign-in.\n- Listing history at the bottom of every property page (sold prices and historical data require a free user account; the table is blurred until they sign in)\n- Free signup, save properties, view listing history, manage profile, change password, delete account\n- Public pages: /about-us, /team, /contact, /faq, /privacy, /terms\n\nData limits (be upfront):\n- All listings come from the regional MLS feed. Pre-2024 historical records may be missing.\n\nStyle:\n- Friendly, professional, concise. Short paragraphs. Plain prose only — no Markdown headings or asterisks INSIDE the reply text.\n- If you don't know something, say so and point them to /contact or info@example.com.\n- Stay on-topic: real estate, our brokerage, our website. Politely redirect off-topic chatter.\n\nBooking nudge:\n- We don't manage existing or past appointments — only new ones.\n- If the visitor wants a viewing, valuation, consultation, or to talk to a person, offer to set up a quick call: \"Would you like me to set up a quick call with one of our agents?\" The booking flow takes over from there.\n\n==================================================\nDATA EXTRACTION RULES — RUN ON EVERY TURN\n==================================================\nRe-evaluate every field every single message. Extract from this turn AND from anything earlier in the conversation. If a field was already collected and the visitor hasn't changed it, repeat the prior value so it isn't lost.\n\n- name        — Full name as the visitor stated it (e.g. \"John Smith\"). Empty string if not yet given.\n- email       — A valid email address (must contain @ and a domain). Empty string if not yet given.\n- phone       — Digits-only phone number (e.g. \"5555550123\"). Empty string if not yet given.\n- address     — Street + city + postal code, only when the visitor mentions a property address (e.g. for a valuation). Empty string otherwise.\n- summary     — Brief summary of the whole conversation. Cover: what they want, what info has been collected (name / email / phone / address), whether the booking link was shared, how interested they are, any blocker, and the next step. Update on every turn. This must be in detailed.\n\n==================================================\nINTEREST CLASSIFICATION (the `interested` field)\n==================================================\nThe `interested` field is ONLY set to \"yes\" once ALL THREE of name, email, and phone have been successfully collected from the visitor. Intent alone is NOT enough — the contact details must be captured first.\n\nSet \"yes\" ONLY when:\n- name is a non-empty valid full name, AND\n- email is a non-empty valid email (contains @ and a domain), AND\n- phone is a non-empty valid phone number (digit-based, reasonable length)\n\nSet \"pending\" when:\n- The visitor has expressed interest (wants to book, meet, view, get valuation, talk to an agent, provided one or two of the contact fields, etc.) but one or more of name/email/phone is still missing or invalid\n- The visitor is browsing, asking general questions, or hasn't decided yet\n- Any other state where the three required fields aren't all collected\n\nSet \"no\" only when the visitor EXPLICITLY says they aren't interested, declines to share info, or says \"not now\" / \"stop\" / \"no thanks\" / \"I was just looking\" / \"I changed my mind\" / etc.\n\nOnce \"interested\" is set to \"yes\" (all three fields collected), it MUST stay \"yes\" on every subsequent turn. Never downgrade back to \"pending\" or \"no\" unless the visitor explicitly opts out.\n\n==================================================\nOUTPUT FORMAT — STRICT\n==================================================\nYou MUST return a single valid JSON object containing ALL of these keys, every single turn, no exceptions:\n\n{\n  \"output\": \"string — your reply to the visitor\",\n  \"name\": \"string — empty if not yet collected\",\n  \"email\": \"string — empty if not yet collected\",\n  \"phone\": \"string — empty if not yet collected\",\n  \"address\": \"string — empty if not yet collected\",\n  \"interested\": \"yes | no | pending\",\n  \"summary\": \"Brief summary of the whole conversation. Cover: what they want, what info has been collected (name / email / phone / address), whether the booking link was shared, how interested they are, any blocker, and the next step. Update on every turn. This must be in detailed.\"\n}\n\nRULES:\n- Return ALL 7 keys every turn, even if values are empty strings.\n- Never omit a key. Never return a partial object.\n- Never wrap the JSON in Markdown fences or prose.\n- If a field was collected on a previous turn, REPEAT that exact value — do not blank it out.\n- The visitor only sees the `output` field. All other fields are stored in the CRM.\n\nEmpty strings are fine when a field hasn't been collected yet. If a field was previously known, repeat the prior value so it isn't wiped from the database.\n\nToday's date and time: '{{ $('Set credentials').item.json.currentDateTime }}'"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -272,
+        272
+      ],
+      "id": "3c38b646-aad6-4b6c-aaa0-83d4f68b0648",
+      "name": "Conversational agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"cal_event_type_id\": {{CAL_EVENT_TYPE_ID}},\n  \"cal_api_key\": \"{{CAL_API_KEY}}\",\n  \"currentDateTime\": \"{{ $('Webhook').item.json?.metadata?.clientCurrentDateTime || new Intl.DateTimeFormat('en-US', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Calcutta', timeZoneName: 'long' }).format(new Date()) }}\",\n  \"timezone\": \"{{ $('Webhook').item?.json?.metadata?.clientCurrentTimezone || 'America/New_York' }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1728,
+        144
+      ],
+      "id": "072f23e6-a89b-4b2e-be1f-3ee9d4f61542",
+      "name": "Set credentials"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aaee98e1-4593-40f8-8125-eff38b08d6d0",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2096,
+        144
+      ],
+      "id": "a7364019-2e65-424b-9676-4c1cefadb17b",
+      "name": "Webhook",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        16,
+        -128
+      ],
+      "id": "c97242c9-881b-4dba-855b-846ce69c6913",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        272
+      ],
+      "id": "5b10858e-94e5-46b9-a627-3e0e81d23a47",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1008,
+        448
+      ],
+      "id": "a6812536-63b6-4022-84e6-ae5662d140c8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        912
+      ],
+      "id": "ad0ffce8-9ccd-4fc2-85ae-75dd43f7dfdb",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "41a61039-9488-4d24-a15e-66d728ae4dac",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1808,
+        848
+      ],
+      "id": "258c6ed7-54da-4edb-b5c4-3449a7ca13a3",
+      "name": "Webhook1",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://contoso-realty.example.com/api/v1/chat/{{ $('Webhook').item.json.body.sessionId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1472,
+        144
+      ],
+      "id": "582cf79c-e9e3-4449-9399-3601987de380",
+      "name": "Get Chat History",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $('Get Chat History').first().json || {};\nconst items = resp.data || [];\n// Drop the most recent message — it's the one we just received and the agent\n// already gets it via 'chatInput' in the prompt.\nconst prior = items.slice(0, Math.max(0, items.length - 1));\nconst transcript = prior\n  .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`)\n  .join('\\n');\nreturn [{ json: { transcript, totalMessages: items.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1264,
+        48
+      ],
+      "id": "c223e5aa-73e5-444b-b77f-177d15e17e37",
+      "name": "Format History"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        592
+      ],
+      "id": "ffb3083c-dd2a-4723-8c26-679960d2517c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Gemini account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Appointment Booking Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Conversational agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Router Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Appointment Booking Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversational agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retrieve_available_free_slots_from_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "Appointment Booking Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "book_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Appointment Booking Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set credentials": {
+      "main": [
+        [
+          {
+            "node": "Get Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversational agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Appointment Booking Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Router Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Get Chat History": {
+      "main": [
+        [
+          {
+            "node": "Format History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format History": {
+      "main": [
+        [
+          {
+            "node": "Router Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Appointment Booking Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Conversational agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/New_York",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
