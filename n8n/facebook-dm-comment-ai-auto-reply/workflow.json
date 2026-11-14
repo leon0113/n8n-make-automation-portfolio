@@ -1,0 +1,1663 @@
+{
+  "name": "Facebook & Instagram DM + Comment AI Auto-Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "comment-item-check",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.item }}",
+              "rightValue": "comment",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "comment-verb-check",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.verb }}",
+              "rightValue": "add",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "comment-msg-check",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "not-from-page",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "rightValue": "={{ $json.body.entry[0].id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2880,
+        3312
+      ],
+      "id": "a9bad33b-4bce-4b02-9f90-d3ff1d559878",
+      "name": "Is Valid Comment?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "commentId",
+              "value": "={{ $json.body.entry[0].changes[0].value.comment_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "commentText",
+              "value": "={{ $json.body.entry[0].changes[0].value.message.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "commentTextLower",
+              "value": "={{ $json.body.entry[0].changes[0].value.message.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "fromName",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.name }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "fromId",
+              "value": "={{ $json.body.entry[0].changes[0].value.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "postId",
+              "value": "={{ $json.body.entry[0].changes[0].value.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "7",
+              "name": "pageId",
+              "value": "={{ $json.body.entry[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "8",
+              "name": "commentWordCount",
+              "value": "={{ $json.body.entry[0].changes[0].value.message.trim().split(' ').length }}",
+              "type": "number"
+            },
+            {
+              "id": "9",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3120,
+        3312
+      ],
+      "id": "5bbcbc38-cf23-4d23-aad3-a59866520e8a",
+      "name": "Extract Comment Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "min-length-check",
+              "leftValue": "={{ $json.commentText.length }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "not-spam",
+              "leftValue": "={{ $json.commentTextLower }}",
+              "rightValue": "^(lol|lmao|😂|👍|❤️|🔥|ok|okay|wow|omg|yep|nope|yes|no|hi|hey|hello|test|[0-9]+)$",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            },
+            {
+              "id": "not-url-only",
+              "leftValue": "={{ $json.commentTextLower }}",
+              "rightValue": "^(https?:\\/\\/[^\\s]+)$",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        3360,
+        3312
+      ],
+      "id": "5a87a5fe-be39-4cc9-81b7-2c5e8ff106e8",
+      "name": "Quality Filter (Skip Spam/Short)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.commentText }}",
+        "options": {
+          "systemMessage": "You are a helpful, friendly public-facing assistant for Northwind Digital Solutions — a professional networking and IT services company.\n\nSomeone named {{ $json.fromName }} left a public comment on our Facebook page.\n\nYour job:\n- Reply warmly and professionally in 1-2 sentences MAXIMUM\n- Be concise, human, and engaging\n- If the comment is a question, answer it or invite them to DM or contact us\n- If the comment is positive (like 'great work' or 'love this'), thank them genuinely\n- If the comment is negative or a complaint, acknowledge it and invite them to reach out privately\n- NEVER use markdown, asterisks, bullet points, or hashtags\n- NEVER start your reply with Hi or Hello every time — vary your opening\n- NEVER make up specific prices, dates, or technical specs\n- Plain text only\n- Do not include the person's name more than once\n- Keep tone warm, professional, and human"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3600,
+        3312
+      ],
+      "id": "ba56a9bc-3a69-41a8-93b4-5271eb3c1602",
+      "name": "AI Agent (Comment)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 150,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3472,
+        3536
+      ],
+      "id": "ec163c11-086c-49c5-b2fc-5bdb066eed39",
+      "name": "OpenAI (Comment)",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "{{GOOGLE_DOC_ID}}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        3888,
+        3520
+      ],
+      "id": "9af3366e-47bd-4c8f-86e3-5d582894c5ab",
+      "name": "Knowledge Base (Google Docs)",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Extract Comment Data').item.json.fromId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3680,
+        3536
+      ],
+      "id": "b55b6d63-2ee0-442d-b2e6-b1fcf193f9d8",
+      "name": "Memory (Comment)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "clean-output",
+              "name": "cleanReply",
+              "value": "={{ $json.output.replace(/\\*\\*/g, '').replace(/\\*/g, '').replace(/#+\\s/g, '').replace(/^\\s+|\\s+$/g, '').replace(/\\n{2,}/g, ' ').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "pass-comment-id",
+              "name": "commentId",
+              "value": "={{ $('Extract Comment Data').item.json.commentId }}",
+              "type": "string"
+            },
+            {
+              "id": "pass-from-name",
+              "name": "fromName",
+              "value": "={{ $('Extract Comment Data').item.json.fromName }}",
+              "type": "string"
+            },
+            {
+              "id": "pass-from-id",
+              "name": "fromId",
+              "value": "={{ $('Extract Comment Data').item.json.fromId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3904,
+        3312
+      ],
+      "id": "ad5d4f0a-c44e-45bd-b90e-2209162c9187",
+      "name": "Clean AI Output"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4080,
+        3312
+      ],
+      "id": "2e984db6-dcfb-4ca3-9eb0-ea8bc68822ef",
+      "name": "Wait 10s (Anti-spam delay)",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.commentId }}/comments",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "{{FACEBOOK_PAGE_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"message\": $json.cleanReply }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4320,
+        3312
+      ],
+      "id": "4d3a6261-91e2-48c8-a8f4-d320fa6a0304",
+      "name": "Post Comment Reply"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "EVENT_RECEIVED",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        4560,
+        3312
+      ],
+      "id": "43c66b6e-ce20-41a4-bd13-cdab1171fc42",
+      "name": "Respond 200 OK"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "success-check",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        4560,
+        3072
+      ],
+      "id": "a90c276f-ed1f-42d9-bef8-1cda2eef6b07",
+      "name": "Reply Posted Successfully?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/chat_messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session_id",
+              "value": "={{ $('Extract Comment Data').item.json.fromId }}"
+            },
+            {
+              "name": "phone"
+            },
+            {
+              "name": "role",
+              "value": "conversation"
+            },
+            {
+              "name": "text",
+              "value": "={{ 'Customer (comment): ' + $('Extract Comment Data').item.json.commentText + '\\nAgent: ' + $('Clean AI Output').item.json.cleanReply + '\\n------------------------' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "756ed68f-c260-4538-b1bb-f66d2a817dcf",
+      "name": "Append Comment Chat History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4560,
+        3520
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/contacts?on_conflict=session_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session_id",
+              "value": "={{ $('Extract Comment Data').item.json.fromId }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $('Extract Comment Data').item.json.fromName }}"
+            },
+            {
+              "name": "source",
+              "value": "Facebook"
+            },
+            {
+              "name": "lead_status",
+              "value": "New Lead"
+            },
+            {
+              "name": "customer_replied",
+              "value": "Yes"
+            },
+            {
+              "name": "unsubscribe",
+              "value": "No"
+            },
+            {
+              "name": "last_message_sent",
+              "value": "={{ $('Clean AI Output').item.json.cleanReply }}"
+            },
+            {
+              "name": "last_action_date",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c6702ec-b9cd-4896-86f7-0f55a981b132",
+      "name": "Upsert Comment Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4800,
+        3520
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/workflow_executions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "workflow_name",
+              "value": "Facebook Comment — AI Reply"
+            },
+            {
+              "name": "automation",
+              "value": "Facebook"
+            },
+            {
+              "name": "contact_name",
+              "value": "={{ $('Extract Comment Data').item.json.fromName }}"
+            },
+            {
+              "name": "status",
+              "value": "success"
+            },
+            {
+              "name": "trigger",
+              "value": "Facebook Comment"
+            },
+            {
+              "name": "notes",
+              "value": "={{ $('Extract Comment Data').item.json.commentText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d1b510c-22e9-4fe8-a829-ac9094cd1bea",
+      "name": "Log Execution Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5040,
+        3520
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "facebook-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "8ec2ad82-153b-4ce1-a0b4-1ccf0980b55a",
+      "name": "Facebook Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        2464
+      ],
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2864,
+        2224
+      ],
+      "id": "c43f8c1d-1f3c-44d7-8ed8-1cf0641fc281",
+      "name": "Verify Webhook GET"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "msg-check",
+              "leftValue": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2864,
+        2464
+      ],
+      "id": "435820b5-9d45-4301-bae5-211faa97f556",
+      "name": "Is DM Message?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "senderId",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "userMessage",
+              "value": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "messageId",
+              "value": "={{ $json.body.entry[0].messaging[0].message.mid }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "pageId",
+              "value": "={{ $json.body.entry[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "platform",
+              "value": "={{ $json.body.object === 'instagram' ? 'Instagram' : 'Facebook' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3056,
+        2464
+      ],
+      "id": "3ad2fa3c-3594-406f-ac6e-d9891fb1dde6",
+      "name": "Extract DM Data"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/contacts?session_id=eq.{{ $('Extract DM Data').item.json.senderId }}&select=*",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd122436-9b9a-4f4b-ad4c-037b48cc57cb",
+      "name": "Get Contact Row",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3472,
+        2304
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/chat_messages?session_id=eq.{{ $('Extract DM Data').item.json.senderId }}&select=*&order=timestamp.asc",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "83cd1399-4623-4a19-92fe-59acb2c7dc95",
+      "name": "Get DM Chat History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3472,
+        2624
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3696,
+        2464
+      ],
+      "id": "cb12eca0-9cf4-4365-b7af-b0fa905b0256",
+      "name": "Merge DM Contact + History",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const original = $('Extract DM Data').first().json;\n\nlet contactRows = [];\nlet historyRows = [];\n\ntry { contactRows = $('Get Contact Row').all() || []; } catch(e) {}\ntry { historyRows = $('Get DM Chat History').all() || []; } catch(e) {}\n\nconst contact = contactRows.find(r => r.json && r.json['session_id'])?.json || {};\n\nlet chatHistory = '';\nif (historyRows.length > 0) {\n  chatHistory = historyRows\n    .map(r => r.json['Chat History'] || r.json['text'])\n    .filter(Boolean)\n    .join('\\n');\n}\n\nconst bookingLink = 'https://cal.com/{{BOOKING_SLUG}}';\nconst bookingAlreadySent = chatHistory.includes(bookingLink) ? 'Yes' : 'No';\n\nreturn [{\n  json: {\n    ...original,\n    contactExists: !!contact['session_id'],\n    contactName: contact['name'] || '',\n    contactEmail: contact['email'] || '',\n    contactPhone: contact['phone'] || '',\n    serviceType: contact['service_type'] || '',\n    existingSummary: contact['summary'] || '',\n    existingInterest: contact['interest'] || 'Pending',\n    existingLastMessage: contact['last_message_sent'] || '',\n    chatHistory: chatHistory || '',\n    hasHistory: chatHistory ? 'Yes' : 'No',\n    bookingAlreadySent,\n    bookingLink\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3904,
+        2464
+      ],
+      "id": "3e732e15-3431-4673-8138-5827d0105bf2",
+      "name": "Merge Context",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "contact-exists-check",
+              "leftValue": "={{ $json.contactExists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4128,
+        2464
+      ],
+      "id": "a82c9f23-3023-4540-b473-db4f1e0a8f84",
+      "name": "If Contact Exists"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/contacts?on_conflict=session_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session_id",
+              "value": "={{ $json.senderId }}"
+            },
+            {
+              "name": "source",
+              "value": "={{ $json.platform }}"
+            },
+            {
+              "name": "interest",
+              "value": "Pending"
+            },
+            {
+              "name": "summary",
+              "value": "={{ 'New ' + $json.platform + ' DM' }}"
+            },
+            {
+              "name": "lead_status",
+              "value": "New Lead"
+            },
+            {
+              "name": "customer_replied",
+              "value": "Yes"
+            },
+            {
+              "name": "unsubscribe",
+              "value": "No"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca78830d-0cfe-4304-9d4e-6d4cdcd98fab",
+      "name": "Create New Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4352,
+        2608
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userMessage || $('Extract DM Data').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "=You are Ava, a friendly, natural, and helpful assistant for Northwind Digital Solutions Inc. (northwind-digital.example.com) — an AI automation and workflow orchestration agency.\n\nGOAL\nHelp the visitor understand what Northwind Digital does, answer questions using your knowledge base, collect their contact details, and send the booking link once they show any interest.\n\nBOOKING LINK: {{ $json.bookingLink }}\nBOOKING LINK ALREADY SENT: {{ $json.bookingAlreadySent }}\n\n==================================================\nCURRENT VISITOR CONTEXT\n==================================================\n- Name: {{ $json.contactName }}\n- Email: {{ $json.contactEmail }}\n- Phone: {{ $json.contactPhone }}\n- Service Type: {{ $json.serviceType }}\n- Existing Summary: {{ $json.existingSummary }}\n- Existing Interest: {{ $json.existingInterest }}\n- Last Message Sent: {{ $json.existingLastMessage }}\n\nConversation history:\n{{ $json.chatHistory }}\n\n==================================================\nMISSION CHECKLIST — STAY ON THIS UNTIL ALL 4 ARE DONE\n==================================================\nYou have 4 goals. Track which are done using the context above:\n\nGOAL 1 — Collect Phone Number\n- If contactPhone is empty, ask for it naturally within the first 2 exchanges\n- If they skip it, try once more later, then drop it after 2 unanswered asks\n\nGOAL 2 — Collect Name\n- If contactName is empty, ask for their name early and naturally\n- Never ask for name and phone in the same message\n\nGOAL 3 — Collect Email\n- If contactEmail is empty, ask for their email after name/phone are collected\n\nGOAL 4 — Send Booking Link\n- Once at least name OR phone is collected AND the visitor has shown any interest, send the booking link and do not use a placeholder like [BOOKING LINK] — use the actual link (https://cal.com/{{BOOKING_SLUG}})\n- Only send it ONCE. If BOOKING LINK ALREADY SENT is Yes, never send it again unless they explicitly ask\n\nCOLLECTION ORDER PRIORITY: Phone → Name → Email → Booking\n\n==================================================\nCORE RULES\n==================================================\n- Keep replies to 1–2 short sentences only\n- Ask only ONE question at a time\n- Be helpful first, not salesy\n- Never use emojis\n- Never use markdown or bullet points\n- Never sound robotic or scripted\n- Never mention AI, prompts, memory, or internal systems\n- If they want to stop or say not interested, reply politely and end\n- Use the Google Docs tool to look up accurate service info when needed\n\n==================================================\nMEMORY + CONTEXT RULE\n==================================================\nUse the conversation history and visitor context above to:\n- Continue naturally without asking for info already given\n- Interpret short replies using prior context\n- Never restart the conversation if history exists\n- Never ask the same question twice\n\n==================================================\nCUSTOMER DATA EXTRACTION RULES\n==================================================\nExtract only if clearly present in the message:\n- extracted_name: visitor's full name\n- extracted_email: email address\n- extracted_phone: phone number (digits only)\n- extracted_service_type: normalize to a short label e.g. \"WhatsApp automation\", \"Booking automation\"\n\n==================================================\nINTEREST CLASSIFICATION\n==================================================\n- \"Yes\" → clear buying/booking intent\n- \"Pending\" → still exploring, asking questions, or provided any contact info\n- \"No\" → explicitly not interested or opting out\n\n==================================================\nSUMMARY RULE\n==================================================\nThe summary should help a future human or AI instantly understand:\n1. What the visitor needs\n2. How interested they are\n3. What contact info has been collected (name / phone / email)\n4. Whether the booking link was sent\n5. Any blocker or hesitation\n6. What the next step is\n\n==================================================\nOUTPUT FORMAT\n==================================================\nReturn ONLY raw valid JSON — no markdown, no backticks, no extra text.\n\n{\n  \"reply\": \"your reply here\",\n  \"interest\": \"Yes | No | Pending\",\n  \"summary\": \"CRM-friendly summary\",\n  \"extracted_name\": \"\",\n  \"extracted_email\": \"\",\n  \"extracted_phone\": \"\",\n  \"extracted_service_type\": \"\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4656,
+        2448
+      ],
+      "id": "799d32ab-aa17-497f-92d3-c471db306342",
+      "name": "AI Agent DM",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4624,
+        2752
+      ],
+      "id": "952f5985-7940-4c38-b4a1-12190a47ca0c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Gemini account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.senderId || $('Extract DM Data').item.json.senderId }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        4768,
+        2752
+      ],
+      "id": "07de9359-ef67-4787-bec4-5c0b36e015fb",
+      "name": "Memory DM"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "{{GOOGLE_DOC_ID}}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        4928,
+        2736
+      ],
+      "id": "44dda3a7-76cb-45b4-ab43-77edd862fc6d",
+      "name": "Google Docs Knowledge",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output || '';\nconst base = $('Merge Context').first().json;\n\nlet reply = '';\nlet interest = 'Pending';\nlet summary = '';\nlet extracted_name = '';\nlet extracted_email = '';\nlet extracted_phone = '';\nlet extracted_service_type = '';\n\ntry {\n  const cleaned = raw.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  reply = parsed.reply || '';\n  interest = parsed.interest || 'Pending';\n  summary = parsed.summary || '';\n  extracted_name = parsed.extracted_name || '';\n  extracted_email = parsed.extracted_email || '';\n  extracted_phone = (parsed.extracted_phone || '').replace(/\\D/g, '');\n  extracted_service_type = parsed.extracted_service_type || '';\n} catch (e) {\n  try {\n    const match = raw.match(/\\{[\\s\\S]*\\}/);\n    if (match) {\n      const parsed = JSON.parse(match[0]);\n      reply = parsed.reply || '';\n      interest = parsed.interest || 'Pending';\n      summary = parsed.summary || '';\n      extracted_name = parsed.extracted_name || '';\n      extracted_email = parsed.extracted_email || '';\n      extracted_phone = (parsed.extracted_phone || '').replace(/\\D/g, '');\n      extracted_service_type = parsed.extracted_service_type || '';\n    }\n  } catch (e2) {}\n}\n\nif (!reply) {\n  reply = raw.replace(/```[\\s\\S]*?```/g, '').trim();\n  if (!reply) reply = 'Thanks for reaching out! How can I help you today?';\n}\n\nconst finalName = extracted_name || base.contactName;\nconst finalEmail = extracted_email || base.contactEmail;\nconst finalPhone = extracted_phone || base.contactPhone;\nconst finalService = extracted_service_type || base.serviceType;\n\nreturn [{ json: {\n  ...base,\n  reply,\n  interest,\n  summary,\n  extracted_name,\n  extracted_email,\n  extracted_phone,\n  extracted_service_type,\n  finalName,\n  finalEmail,\n  finalPhone,\n  finalService\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5104,
+        2448
+      ],
+      "id": "093e0bd7-0c84-405b-97be-dfe0599c9cd1",
+      "name": "Parse Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "const customerMsg = $('Extract DM Data').first().json.userMessage || '';\nconst agentMsg = $('Parse Reply').first().json.reply || '';\n\nconst newChatBlock = `Customer: ${customerMsg}\\nAgent: ${agentMsg}\\n------------------------`;\n\nreturn [{\n  json: {\n    ...$('Parse Reply').first().json,\n    newChatBlock\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5312,
+        2448
+      ],
+      "id": "eb4db393-2342-4080-aa56-4c935cc9519c",
+      "name": "Build Chat Block"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.pageId || $('Extract DM Data').item.json.pageId }}/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "{{FACEBOOK_PAGE_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $json.senderId }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": \"{{ $json.reply.replace(/\\*\\*/g, '') }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5552,
+        2448
+      ],
+      "id": "d8d07553-e2f8-4e08-8988-6bfe89468bf0",
+      "name": "Send DM Reply"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/chat_messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "session_id",
+              "value": "={{ $('Build Chat Block').item.json.senderId || $('Extract DM Data').item.json.senderId }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $('Parse Reply').item.json.finalPhone }}"
+            },
+            {
+              "name": "role",
+              "value": "conversation"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Build Chat Block').item.json.newChatBlock }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1452b5ec-1589-43c4-9860-03ec33fc10f3",
+      "name": "Append DM Chat History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5792,
+        2448
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/contacts?session_id=eq.{{ $('Build Chat Block').item.json.senderId || $('Extract DM Data').item.json.senderId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $('Parse Reply').item.json.finalName }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('Parse Reply').item.json.finalEmail }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $('Parse Reply').item.json.finalPhone }}"
+            },
+            {
+              "name": "service_type",
+              "value": "={{ $('Parse Reply').item.json.finalService }}"
+            },
+            {
+              "name": "interest",
+              "value": "={{ $('Parse Reply').item.json.interest }}"
+            },
+            {
+              "name": "summary",
+              "value": "={{ $('Parse Reply').item.json.summary }}"
+            },
+            {
+              "name": "source",
+              "value": "={{ $('Build Chat Block').item.json.platform }}"
+            },
+            {
+              "name": "lead_status",
+              "value": "New Lead"
+            },
+            {
+              "name": "customer_replied",
+              "value": "Yes"
+            },
+            {
+              "name": "unsubscribe",
+              "value": "No"
+            },
+            {
+              "name": "last_message_sent",
+              "value": "={{ $('Parse Reply').item.json.reply }}"
+            },
+            {
+              "name": "last_action_date",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "18e55a57-0b8c-47dc-9eb1-445998c5e543",
+      "name": "Upsert DM Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6032,
+        2448
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://{{SUPABASE_PROJECT_ID}}.supabase.co/rest/v1/workflow_executions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{SUPABASE_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "workflow_name",
+              "value": "={{ $('Parse Reply').item.json.platform + ' DM — AI Reply' }}"
+            },
+            {
+              "name": "automation",
+              "value": "={{ $('Parse Reply').item.json.platform }}"
+            },
+            {
+              "name": "contact_name",
+              "value": "={{ $('Parse Reply').item.json.finalName }}"
+            },
+            {
+              "name": "status",
+              "value": "success"
+            },
+            {
+              "name": "trigger",
+              "value": "={{ $('Parse Reply').item.json.platform + ' DM' }}"
+            },
+            {
+              "name": "notes",
+              "value": "={{ 'Interest: ' + $('Parse Reply').item.json.interest }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0814a5c9-43b6-49a7-8671-132d6ad433e2",
+      "name": "Log Execution DM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6272,
+        2448
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Is Valid Comment?": {
+      "main": [
+        [
+          {
+            "node": "Extract Comment Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Comment Data": {
+      "main": [
+        [
+          {
+            "node": "Quality Filter (Skip Spam/Short)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Filter (Skip Spam/Short)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Comment)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Comment)": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI (Comment)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Comment)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base (Google Docs)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent (Comment)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory (Comment)": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent (Comment)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Output": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s (Anti-spam delay)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s (Anti-spam delay)": {
+      "main": [
+        [
+          {
+            "node": "Post Comment Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Comment Reply": {
+      "main": [
+        [
+          {
+            "node": "Reply Posted Successfully?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond 200 OK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append Comment Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Comment Chat History": {
+      "main": [
+        [
+          {
+            "node": "Upsert Comment Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Comment Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Execution Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Webhook GET",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is DM Message?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Valid Comment?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is DM Message?": {
+      "main": [
+        [
+          {
+            "node": "Extract DM Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract DM Data": {
+      "main": [
+        [
+          {
+            "node": "Get Contact Row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get DM Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact Row": {
+      "main": [
+        [
+          {
+            "node": "Merge DM Contact + History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DM Chat History": {
+      "main": [
+        [
+          {
+            "node": "Merge DM Contact + History",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge DM Contact + History": {
+      "main": [
+        [
+          {
+            "node": "Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Context": {
+      "main": [
+        [
+          {
+            "node": "If Contact Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Contact Exists": {
+      "main": [
+        [
+          {
+            "node": "AI Agent DM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create New Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Contact": {
+      "main": [
+        [
+          {
+            "node": "AI Agent DM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent DM": {
+      "main": [
+        [
+          {
+            "node": "Parse Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent DM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory DM": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent DM",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs Knowledge": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent DM",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Reply": {
+      "main": [
+        [
+          {
+            "node": "Build Chat Block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chat Block": {
+      "main": [
+        [
+          {
+            "node": "Send DM Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send DM Reply": {
+      "main": [
+        [
+          {
+            "node": "Append DM Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append DM Chat History": {
+      "main": [
+        [
+          {
+            "node": "Upsert DM Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert DM Contact": {
+      "main": [
+        [
+          {
+            "node": "Log Execution DM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
