@@ -1,0 +1,1780 @@
+{
+  "name": "AI Voice Call Handler: GoHighLevel Booking & CRM Sync (Retell AI)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voice-call-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Retell Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -256
+      ],
+      "id": "ef2f4f83-e11d-4117-ba8b-245ef93d072e",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.event ?? '' }}",
+                    "rightValue": "call_started",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4a911c34-5c28-49a9-9d7e-7089f45fad30"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "call_started"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "c6f4e695-badd-4972-889d-0d5bd881fddd",
+                    "leftValue": "={{ $json.body.event ?? '' }}",
+                    "rightValue": "call_analyzed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "call_analyzed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "28cc1088-0c94-4775-b7c0-6dab744f7060",
+                    "leftValue": "={{ $json.body.name ?? '' }}",
+                    "rightValue": "Get_Availability",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Get_Availability"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b1b9c5d7-2c6c-4f1a-b1c1-2d8001262cd1",
+                    "leftValue": "={{ $json.body.name ?? '' }}",
+                    "rightValue": "schedule_appointment",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "schedule_appointment"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Route Function",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        544,
+        -256
+      ],
+      "id": "21857299-c9ac-41d7-8793-e3a05ae14a9b"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"availability\": \"{{ $json.availability }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "name": "Return to Retell",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -480
+      ],
+      "id": "111f5ea2-9eca-4eda-affc-489c4317fcab"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json;\n\n// Extract date key (ignore traceId)\nconst dateKey = Object.keys(data).find(\n  key => /^\\d{4}-\\d{2}-\\d{2}$/.test(key)\n);\nconsole.log(items,dateKey);\nif (!dateKey) {\n  return [{\n    json: {\n      availability: \"No available time slots were found.\"\n    }\n  }];\n}\n\nconst slots = data[dateKey]?.slots || [];\n\nif (!slots.length) {\n  return [{\n    json: {\n      availability: `No available time slots on ${dateKey}.`\n    }\n  }];\n}\n\n// Format times correctly\nconst formattedSlots = slots.map(slot =>\n  new Date(slot).toLocaleTimeString(\"en-US\", {\n    hour: \"numeric\",\n    minute: \"2-digit\",\n    hour12: true,\n    timeZone: \"America/New_York\"\n  })\n);\n\n// Limit to first 6 slots (Retell-safe)\nconst limited = formattedSlots.join(\", \");\n\nreturn [{\n  json: {\n    date: dateKey,\n    slots,\n    availability: `Available times on ${dateKey} are ${limited} Eastern Time.`\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        -480
+      ],
+      "id": "9446693b-15c4-428e-87fc-cab3e9a3a8e7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/calendars/{{FREE_SLOTS_CALENDAR_ID}}/free-slots",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{$json.startDate}}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $json.endDate }}"
+            },
+            {
+              "name": "timezone",
+              "value": "={{$json.timezone}}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL Get Free Slots",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1200,
+        -480
+      ],
+      "id": "f06f5b94-a43a-4c7f-89d8-61c2d90631e1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e74b47bb-1260-4e29-afd9-b525fa793dbe",
+              "name": "location id",
+              "value": "{{LOCATION_ID}}",
+              "type": "string"
+            },
+            {
+              "id": "f24e3cfc-ca04-492d-ac04-824c08824bd5",
+              "name": "auth",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a39ffe7e-20e5-45a6-a45c-067e5be12ef2",
+              "name": "calender id",
+              "value": "{{CALENDAR_ID}}",
+              "type": "string"
+            },
+            {
+              "id": "e310a15c-6535-4c2e-9bd7-f80f3f81a4b1",
+              "name": "phone",
+              "value": "={{ $json.body.call?.to_number || $json.body.args?.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "cde8397a-5855-49cb-8ea1-89aec9b11d2b",
+              "name": "full_name",
+              "value": "={{ $json.body.args?.full_name || $json.body.call?.retell_llm_dynamic_variables?.customer_name || 'Customer' }}",
+              "type": "string"
+            },
+            {
+              "id": "d004c812-d57f-4ea9-ace0-3d7a2e0bff9a",
+              "name": "startTime",
+              "value": "={{ (() => { const time = $json.body.args.startTime; if (!time) return null; const hasOffset = time.indexOf('-', 10) > 0 || time.indexOf('+', 10) > 0; return hasOffset ? time : time + '-05:00'; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -176
+      ],
+      "id": "b72815b7-3a69-4779-bdf0-d3771fd7f5f8",
+      "name": "Set Variables2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{ $('Set Variables2').item.json['location id'] }}\",\n  \"page\": 1,\n  \"pageLimit\": 20,\n  \"filters\": [\n    {\n      \"field\": \"phone\",\n      \"operator\": \"eq\",\n      \"value\": \"{{ $('Set Variables2').item.json.phone }}\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "name": "GHL - Search Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1136,
+        -176
+      ],
+      "id": "a16fce3d-98d8-4a56-a74e-71d0f044c160"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3f5bce00-5781-4ae5-8b45-e29967e89e96",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        -176
+      ],
+      "id": "cc01c8f7-3b56-4390-bd4f-2c876319101e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/calendars/events/appointments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $('Set Variables2').item.json['location id'] }}"
+            },
+            {
+              "name": "calendarId",
+              "value": "={{ $('Set Variables2').item.json['calender id'] }}"
+            },
+            {
+              "name": "contactId",
+              "value": "={{ $('GHL - Search Contact').item.json.contacts[0].id }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('Set Variables2').item.json['startTime'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL - Create Appointment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2032,
+        -320
+      ],
+      "id": "d5309450-486f-4a37-b515-7329a8fbb687"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c4980db-7309-470b-829f-a51c867f86af",
+              "leftValue": "={{ $('GHL - Create Appointment').item.json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2848,
+        -320
+      ],
+      "id": "b6ae5766-ca7b-4f39-a433-e99a0dbef1b9",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n\"status\": {{ JSON.stringify($('GHL - Create Appointment').item.json.status)}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3088,
+        -512
+      ],
+      "id": "1424d169-575a-470c-b922-795bcaa3a3d4",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('GHL - Create Appointment').item.json.error.message) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3136,
+        -304
+      ],
+      "id": "58b0c2cc-9ae1-4c2a-b48a-e95d3976b60c",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"name\": \"{{ $('Set Variables2').item.json.full_name }}\",\n\"locationId\": \"{{ $('Set Variables2').item.json['location id'] }}\",\n\"phone\": \"{{ $('Set Variables2').item.json.phone }}\"\n}",
+        "options": {}
+      },
+      "name": "GHL - Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1856,
+        -16
+      ],
+      "id": "ada422a9-70c7-4121-9f1b-d551def7de3c",
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/calendars/events/appointments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "locationId",
+              "value": "={{ $('Set Variables2').item.json['location id'] }}"
+            },
+            {
+              "name": "calendarId",
+              "value": "={{ $('Set Variables2').item.json['calender id'] }}"
+            },
+            {
+              "name": "contactId",
+              "value": "={{ $('GHL - Create Contact').item.json.contact.id }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('Set Variables2').item.json['startTime'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL - Create Appointment1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2560,
+        -32
+      ],
+      "id": "eb9f2bf4-348d-4cf1-8240-9b4b18ab8bd9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c4980db-7309-470b-829f-a51c867f86af",
+              "leftValue": "={{ $('GHL - Create Appointment1').item.json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3408,
+        -32
+      ],
+      "id": "ad6ba596-553f-4a8c-a031-509c4716ae55",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n\"status\": {{ JSON.stringify($('GHL - Create Appointment1').item.json.status)}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3680,
+        -144
+      ],
+      "id": "0d8fd934-febd-48c1-84e1-c249fd9fe7d1",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n\"error message\": \"{{ JSON.stringify($('GHL - Create Appointment1').item.json.error.message) }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3680,
+        32
+      ],
+      "id": "80dfd64d-cad6-4f42-967b-9c5cc5ef1e43",
+      "name": "Respond to Webhook4"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"failed to Create contact\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2224,
+        176
+      ],
+      "id": "d0c2c752-fc49-4a07-9e82-e1a24c3e9ff1",
+      "name": "Respond to Webhook5"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const requested = new Date(\n  $('Retell Webhook').item.json.body.args.startDate\n);\n\n// Start of requested day (calendar timezone)\nconst startDate = new Date(requested);\nstartDate.setHours(0, 0, 0, 0);\n\n// End of requested day (exclusive)\nconst endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);\n\nreturn {\n  startDate: startDate.getTime(),\n  endDate: endDate.getTime(),\n  timezone: \"America/New_York\",\n  calendarId: \"{{CALENDAR_ID}}\"\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        -480
+      ],
+      "id": "83a08762-9a54-4bd5-8260-c1fa22e555da",
+      "name": "Set Variables1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const spokenTime = $('Retell Webhook').item.json.body.args.startTime;\nconst freeSlotsResponse = $('GHL Get Free Slots').item.json;\n\n// Validate response\nif (!Array.isArray(freeSlotsResponse) || !freeSlotsResponse.length) {\n  return [{\n    json: {\n      error: 'No free slots available'\n    }\n  }];\n}\n\nconst data = freeSlotsResponse[0];\nconst date = Object.keys(data).find(k => /^\\d{4}-\\d{2}-\\d{2}$/.test(k));\n\nif (!date) {\n  return [{\n    json: {\n      error: 'No valid date found'\n    }\n  }];\n}\n\nconst slots = data[date].slots;\n\n// Match spoken time with free slot\nconst matchedSlot = slots.find(s =>\n  new Date(s).toLocaleTimeString('en-US', {\n    hour: 'numeric',\n    minute: '2-digit',\n    hour12: true,\n    timeZone: 'America/New_York'\n  }) === spokenTime\n);\n\nif (!matchedSlot) {\n  return [{\n    json: {\n      error: 'Selected time is no longer available'\n    }\n  }];\n}\n\n// Success — return matched slot\nreturn [{\n  json: {\n    startTime: matchedSlot\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -320
+      ],
+      "id": "b8444989-ac5a-4e9e-be26-6aad4c76b750",
+      "name": "Code in JavaScript1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const spokenTime = $('Retell Webhook').item.json.body.args.startTime;\nconst freeSlotsResponse = $('GHL Get Free Slots').item.json;\n\n// Validate response\nif (!Array.isArray(freeSlotsResponse) || !freeSlotsResponse.length) {\n  return [{\n    json: {\n      error: 'No free slots available'\n    }\n  }];\n}\n\nconst data = freeSlotsResponse[0];\nconst date = Object.keys(data).find(k => /^\\d{4}-\\d{2}-\\d{2}$/.test(k));\n\nif (!date) {\n  return [{\n    json: {\n      error: 'No valid date found'\n    }\n  }];\n}\n\nconst slots = data[date].slots;\n\n// Match spoken time with free slot\nconst matchedSlot = slots.find(s =>\n  new Date(s).toLocaleTimeString('en-US', {\n    hour: 'numeric',\n    minute: '2-digit',\n    hour12: true,\n    timeZone: 'America/New_York'\n  }) === spokenTime\n);\n\nif (!matchedSlot) {\n  return [{\n    json: {\n      error: 'Selected time is no longer available'\n    }\n  }];\n}\n\n// Success — return matched slot\nreturn [{\n  json: {\n    startTime: matchedSlot\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        -32
+      ],
+      "id": "9d992897-d64d-4b79-8658-c2e824f704a7",
+      "name": "Code in JavaScript2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Call ended",
+            "phone_e164": "={{ $json.body.call.to_number.replace(/^\\+/, '') }}",
+            "outcome": "={{ $json.body.call.call_analysis.call_summary }}"
+          },
+          "matchingColumns": [
+            "phone_e164"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone_e164",
+              "displayName": "phone_e164",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "attempt_count",
+              "displayName": "attempt_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_attempt_at",
+              "displayName": "last_attempt_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "outcome",
+              "displayName": "outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        736,
+        -784
+      ],
+      "id": "78580cf8-b33c-4e8c-9458-fb374c3d0a90",
+      "name": "Update row in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a5ae341d-0bd8-461f-9a13-9ec5875511c2",
+              "name": "phone_number",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        800
+      ],
+      "id": "a19038ab-1bec-424a-ac2e-149c3428c3d0",
+      "name": "Extract Call Data",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Call Initialized",
+            "phone_e164": "={{ $json.body.call.to_number }}"
+          },
+          "matchingColumns": [
+            "phone_e164"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone_e164",
+              "displayName": "phone_e164",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "attempt_count",
+              "displayName": "attempt_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_attempt_at",
+              "displayName": "last_attempt_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "outcome",
+              "displayName": "outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        800
+      ],
+      "id": "9e362db1-edbf-4136-9e2d-8e207f072ebf",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/opportunities/pipelines?locationId={{ $('Set Variables2').item.json['location id'] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL - Get Pipeline Id",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2784,
+        -32
+      ],
+      "id": "b98befe9-ca6c-42a3-b579-01bc110cf741"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pipelines = items[0].json.pipelines;\n\nconst pipeline = pipelines.find(p => p.id === \"{{PIPELINE_ID}}\");\nif (!pipeline) throw new Error(\"Pipeline not found\");\n\nconst stage = pipeline.stages.find(s => s.name === \"New Lead\");\nif (!stage) throw new Error(\"Stage not found\");\n\nreturn [{\n  json: {\n    pipelineId: pipeline.id,\n    pipelineStageId: stage.id\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2992,
+        -32
+      ],
+      "id": "2b4b0860-ede6-41a5-ab0c-da4b353ae0b0",
+      "name": "Extract stage ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/opportunities/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{ $('Set Variables2').item.json['location id'] }}\",\n  \"contactId\": \"{{ $('GHL - Create Contact').item.json.contact.id }}\",\n  \"pipelineId\": \"{{ $json.pipelineId }}\",\n  \"pipelineStageId\": \"{{ $json.pipelineStageId }}\",\n  \"name\": \"{{ $('Retell Webhook').item.json.body.args?.full_name || $('Retell Webhook').item.json.body.call?.retell_llm_dynamic_variables?.customer_name || 'Customer' }} – AI Appointment Scheduled\",\n  \"status\": \"open\",\n  \"monetaryValue\": 0\n}\n",
+        "options": {}
+      },
+      "name": "GHL - Create Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3184,
+        -32
+      ],
+      "id": "d0b5c1d8-deb2-4317-8d02-f6c1cc7c92ae"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/opportunities/pipelines?locationId={{ $('Set Variables2').item.json['location id'] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL - Get Pipeline Id1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2240,
+        -320
+      ],
+      "id": "2e9b3739-66da-409e-8166-2d39f3eeda93"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pipelines = items[0].json.pipelines;\n\nconst pipeline = pipelines.find(p => p.id === \"{{PIPELINE_ID}}\");\nif (!pipeline) throw new Error(\"Pipeline not found\");\n\nconst stage = pipeline.stages.find(s => s.name === \"New Lead\");\nif (!stage) throw new Error(\"Stage not found\");\n\nreturn [{\n  json: {\n    pipelineId: pipeline.id,\n    pipelineStageId: stage.id\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        -320
+      ],
+      "id": "70cc887f-150c-4643-9dd2-eba44bc86157",
+      "name": "Extract stage ID1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/opportunities/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{ $('Set Variables2').item.json['location id'] }}\",\n  \"contactId\": \"{{ $('GHL - Search Contact').item.json.contacts[0].id }}\",\n  \"pipelineId\": \"{{ $json.pipelineId }}\",\n  \"pipelineStageId\": \"{{ $json.pipelineStageId }}\",\n  \"name\": \"{{ $('Retell Webhook').item.json.body.args?.full_name || $('Retell Webhook').item.json.body.call?.retell_llm_dynamic_variables?.customer_name || 'Customer' }} – AI Appointment Scheduled\",\n  \"status\": \"open\",\n  \"monetaryValue\": 0\n}\n",
+        "options": {}
+      },
+      "name": "GHL - Create Opportunity1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2640,
+        -320
+      ],
+      "id": "6f61146d-5946-4bf1-948b-38bb725fc746"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{LOCATION_ID}}\",\n  \"page\": 1,\n  \"pageLimit\": 1,\n  \"filters\": [\n    {\n      \"field\": \"phone\",\n      \"operator\": \"eq\",\n      \"value\": \"{{ $('Retell Webhook').item.json.body.call.to_number }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "GHL - Search Contact1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        944,
+        -784
+      ],
+      "id": "931c69e5-80e6-43d6-8a19-3e1cf94f32e8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e15d89d9-2cb0-4732-a979-7926c8120780",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        -784
+      ],
+      "id": "30105c5b-9693-4c58-b89d-f62675d5648f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $json.contacts[0].id }}/notes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"body\": \"📞 Call Summary\\n\\n{{ $('Retell Webhook').item.json.body.call.call_analysis.call_summary }}\"\n}",
+        "options": {}
+      },
+      "name": "GHL - Add Note Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1584,
+        -800
+      ],
+      "id": "b4c4d059-82ed-4f19-b86c-5d9157060afc"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/opportunities/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{LOCATION_ID}}\",\n  \"page\": 1,\n  \"limit\": 1,\n  \"filters\": [\n    {\n      \"field\": \"contact_id\",\n      \"operator\": \"eq\",\n      \"value\": \"{{ $('GHL - Search Contact1').item.json.contacts[0].id }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "GHL - Search Opportunity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1856,
+        -800
+      ],
+      "id": "c9f09c4e-9fd5-43fb-bcb4-41e89aa8606a"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c205d775-15ae-4b22-aec0-1cae54760cf8",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2064,
+        -800
+      ],
+      "id": "9c0ab6d8-a0ca-4e1c-ad45-aaf0de2679c0",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "=https://services.leadconnectorhq.com/contacts/{{TEST_CONTACT_ID}}/opportunities",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "GHL Get Free Slots1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1920,
+        -1184
+      ],
+      "id": "32c58879-b7bf-4754-a7ba-c7ba2d8d3f9d",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -1120
+      ],
+      "id": "c119b102-ea42-43b3-971a-5a3b916b75eb",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://services.leadconnectorhq.com/opportunities/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"locationId\": \"{{LOCATION_ID}}\",\n  \"page\": 1,\n  \"limit\": 1,\n  \"filters\": [\n    {\n      \"field\": \"contact_id\",\n      \"operator\": \"eq\",\n      \"value\": \"{{TEST_CONTACT_ID}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "name": "GHL - Search Opportunity1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1584,
+        -1296
+      ],
+      "id": "618667c7-1fa7-4eeb-a912-1b0330def992",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://services.leadconnectorhq.com/contacts/{{ $json.contacts[0].id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"{{ $('Route Function').item.json.body.call.call_analysis.custom_analysis_data.Email }}\",\n  \"address1\": \"{{ $('Retell Webhook').item.json.body.call.call_analysis.custom_analysis_data.StreetAddress }}\",\n  \"city\":\"{{ $('Retell Webhook').item.json.body.call.call_analysis.custom_analysis_data.City }}\",\n  \"state\":\"{{ $('Retell Webhook').item.json.body.call.call_analysis.custom_analysis_data.State }}\",\n  \"postalCode\":\"{{ $('Retell Webhook').item.json.body.call.call_analysis.custom_analysis_data['Postal Code'] }}\"\n}",
+        "options": {}
+      },
+      "name": "GHL - Update Contract email & address",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1312,
+        -912
+      ],
+      "id": "c3a88860-abe3-4116-97b7-fbc4bb26cf06"
+    }
+  ],
+  "connections": {
+    "Retell Webhook": {
+      "main": [
+        [
+          {
+            "node": "Route Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Function": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Variables1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Variables2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [],
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Return to Retell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL Get Free Slots": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables2": {
+      "main": [
+        [
+          {
+            "node": "GHL - Search Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Search Contact": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GHL - Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Create Appointment": {
+      "main": [
+        [
+          {
+            "node": "GHL - Get Pipeline Id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Create Appointment1": {
+      "main": [
+        [
+          {
+            "node": "GHL - Get Pipeline Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables1": {
+      "main": [
+        [
+          {
+            "node": "GHL Get Free Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "GHL - Create Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "GHL - Create Appointment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Call Data": {
+      "main": [
+        []
+      ]
+    },
+    "GHL - Get Pipeline Id": {
+      "main": [
+        [
+          {
+            "node": "Extract stage ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract stage ID": {
+      "main": [
+        [
+          {
+            "node": "GHL - Create Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Create Opportunity": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Get Pipeline Id1": {
+      "main": [
+        [
+          {
+            "node": "Extract stage ID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract stage ID1": {
+      "main": [
+        [
+          {
+            "node": "GHL - Create Opportunity1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Create Opportunity1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "GHL - Search Contact1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Search Contact1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "GHL - Update Contract email & address",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GHL - Add Note Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Add Note Summary": {
+      "main": [
+        [
+          {
+            "node": "GHL - Search Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GHL - Search Opportunity": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "GHL - Update Contract email & address": {
+      "main": [
+        []
+      ]
+    },
+    "Return to Retell": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
