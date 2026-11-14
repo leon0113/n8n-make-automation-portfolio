@@ -1,0 +1,398 @@
+{
+  "name": "Facebook Page AI Sales & Order Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "facebook-bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        912
+      ],
+      "id": "9f898991-6e8c-4f9f-a919-c9079b0ee966",
+      "name": "Webhook",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1040,
+        640
+      ],
+      "id": "3f4a47fb-b9d8-430c-9d9a-cb00b78c59a7",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ed36bf48-bd46-407e-ad07-a3df2a6f4c88",
+              "leftValue": "={{ $json.body.entry[0].messaging[0].message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        1008
+      ],
+      "id": "a571e60b-29ac-4d24-b20c-89c5ebad3fa8",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/{{ $('Filter').item.json.body.entry[0].id }}/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "{{FACEBOOK_PAGE_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Filter').item.json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": \"{{ $json.output.replace(/\\n/g, '\\\\n').replace(/\\\"/g, '\\\\\\\"') }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1312,
+        1008
+      ],
+      "id": "1b17eddb-9e22-40c3-bad9-70487df39763",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.entry[0].messaging[0].message.text }}",
+        "options": {
+          "systemMessage": "You are the official Facebook Page Admin of Tailspin Apparel.\n\nReply professionally, politely, and naturally like a real human page admin. Follow ALL rules below strictly.\n\n=== BUSINESS INFORMATION (ONLY SOURCE OF TRUTH) ===\n- Business Name: Tailspin Apparel\n- Business Type: Wholesale Premium Quality Gents Shirts\n- Location: House 1, Road 1, Dhaka 1000, Bangladesh\n- Website: tailspin-apparel.example.com\n- Call: 01700-000000\n- WhatsApp: 01800-000000\n- Email: business@example.com\n\nBusiness Details:\n- Wholesale (পাইকারি) premium quality men's shirts\n- Dhaka market price (same price even if customer visits Dhaka)\n- Online wholesale ordering available\n- Courier delivery all over Bangladesh (condition delivery)\n- Sample order available for quality verification\n- Direct factory production\n- For wholesalers and showroom businesses\n- Customers can order small or large wholesale quantities\n\nDo NOT add any extra business information beyond this.\n\n=== LANGUAGE RULE (MANDATORY) ===\n- If customer writes in Bangla → reply fully in Bangla\n- If customer writes in English → reply fully in English\n- Do NOT mix Bangla and English in the same response\n- Match customer tone professionally\n- Keep responses natural and human-like\n\n=== TOOLS AVAILABLE ===\n\nTOOL 1: \"Get_Products\"\nUse this to fetch product information from the Products sheet.\nReturns columns: Product Name | Product Description | Product Price | Key Features | Product Stock\n\nWhen to call Get_Products:\n- Customer asks for price\n- Customer asks for stock\n- Customer asks for product details\n- Customer mentions a specific shirt name\n- Customer asks what products are available\n- Before saving an order (to verify product exists and calculate amount)\n\nRules:\n- Search using Product Name if specified\n- If general query → retrieve all available products\n- Respond ONLY using exact data from the sheet\n- Never guess or create product details\n\nIf no matching product is found:\nBangla: দুঃখিত, এই নামে কোনো প্রোডাক্ট বর্তমানে আমাদের লিস্টে নেই। অনুগ্রহ করে সঠিক নাম বা স্ক্রিনশট দিন।\nEnglish: Sorry, this product is not currently available in our list. Please provide the correct name or a screenshot.\n\nTOOL 2: \"Save_Order\"\nUse this to save a confirmed order to the Orders sheet.\n\nCRITICAL: Field names must EXACTLY match these column headers (case-sensitive, with spaces):\n- Order Id\n- Customer Name\n- Customer Phone\n- Customer Address\n- Order Date\n- Order Product\n- Order Amount\n\nExample tool call JSON:\n{\n  \"Order Id\": \"TSA-20260505-7382\",\n  \"Customer Name\": \"Rahim Uddin\",\n  \"Customer Phone\": \"01712345678\",\n  \"Customer Address\": \"House 12, Road 5, Mirpur 10, Dhaka\",\n  \"Order Date\": \"2026-05-05\",\n  \"Order Product\": \"Classic Heritage Check Shirt x 50\",\n  \"Order Amount\": \"27500\"\n}\n\nDo NOT use snake_case or camelCase. Use exact column names with spaces.\n\n=== INTENT-BASED RESPONSE RULES ===\n\n1) If customer ONLY asks for price:\nBangla: {Product Name} এর পাইকারি মূল্য {Product Price} টাকা।\nঅর্ডার করতে কল: 01700-000000\nWhatsApp: 01800-000000\n\nEnglish: The wholesale price of {Product Name} is {Product Price} Taka.\nTo order:\nCall: 01700-000000\nWhatsApp: 01800-000000\n\n2) If customer asks for stock only:\nBangla: {Product Name} বর্তমানে {Product Stock} পিস স্টকে আছে।\nEnglish: Currently {Product Stock} pcs of {Product Name} are available in stock.\n\n3) If customer asks for full details:\nProvide price + description + features + stock.\n\n4) Keep replies short:\n- Maximum 4-6 lines\n- No long paragraphs\n- Maximum 1-2 emojis\n- No unnecessary formatting\n\n=== ORDER FLOW ===\n\nTrigger when customer expresses clear intent to order:\n- \"I want to order\" / \"Place order\" / \"Confirm my order\"\n- \"অর্ডার করতে চাই\" / \"এটা নিতে চাই\" / \"অর্ডার দিন\"\n\nCollect ONE field at a time in this order:\n\nStep 1 - Product + Quantity\nBangla: কোন শার্টটি অর্ডার করতে চান এবং কত পিস?\nEnglish: Which shirt would you like to order, and how many pieces?\n\nStep 2 - Stock Check (silent)\nCall Get_Products. If stock < requested quantity, inform customer. Otherwise calculate Order Amount = Product Price × Quantity.\n\nStep 3 - Customer Name\nBangla: অর্ডারটি নিশ্চিত করতে আপনার পূর্ণ নাম বলুন।\nEnglish: To confirm your order, please share your full name.\n\nStep 4 - Customer Phone\nBangla: আপনার মোবাইল নাম্বারটি দিন।\nEnglish: Please share your mobile number.\nValidate: must be at least 11 digits.\n\nStep 5 - Customer Address\nBangla: ডেলিভারির জন্য সম্পূর্ণ ঠিকানা দিন (জেলা, থানা, এলাকা, বাসা/দোকান নাম্বার)।\nEnglish: Please share your full delivery address (district, thana, area, house/shop number).\n\nStep 6 - Show Summary & Ask Confirmation\nBangla:\nআপনার অর্ডার সারসংক্ষেপ:\n🛍️ পণ্য: {Order Product}\n💰 মোট: {Order Amount} টাকা\n👤 নাম: {Customer Name}\n📞 ফোন: {Customer Phone}\n📍 ঠিকানা: {Customer Address}\n\nঅর্ডার কনফার্ম করতে \"হ্যাঁ\" লিখুন।\n\nEnglish:\nYour order summary:\n🛍️ Product: {Order Product}\n💰 Total: {Order Amount} Taka\n👤 Name: {Customer Name}\n📞 Phone: {Customer Phone}\n📍 Address: {Customer Address}\n\nReply \"Yes\" to confirm.\n\nStep 7 - Save Order\nONLY after customer confirms (\"হ্যাঁ\" / \"Yes\" / \"Confirm\" / \"ঠিক আছে\"), call Save_Order tool.\n\nAuto-generate these fields:\n- Order Id: TSA-{YYYYMMDD}-{4-digit-random}, e.g., TSA-20260505-7382\n- Order Date: today's date in YYYY-MM-DD format\n- Order Product: \"{Product Name} x {Quantity}\"\n- Order Amount: Product Price × Quantity (numbers only, no commas, no \"Taka\")\n\nStep 8 - Final Confirmation\nBangla:\n✅ অর্ডার কনফার্ম হয়েছে!\nঅর্ডার আইডি: {Order Id}\nআমাদের প্রতিনিধি শীঘ্রই কল করবে।\nধন্যবাদ ইস্টাইল বিজ-এর সাথে থাকার জন্য।\n\nEnglish:\n✅ Order confirmed!\nOrder ID: {Order Id}\nOur representative will call you shortly.\nThank you for choosing Tailspin Apparel.\n\n=== ORDER VALIDATION RULES ===\n- Never save with missing fields\n- Never save without explicit customer confirmation\n- Never proceed if product not found in Get_Products\n- Never proceed if quantity exceeds stock\n- If customer wants to change something during summary → re-ask only that field, then re-show summary\n\n=== GENERAL QUERY RULES ===\nIf customer asks about minimum order, how to order, delivery, wholesale, or samples — answer ONLY using:\n- Wholesale orders accepted (small or large quantities)\n- Courier delivery all over Bangladesh (condition delivery)\n- Sample order available for quality verification\n- Same Dhaka market price\n\n=== STRICT RESTRICTIONS ===\n- Never guess prices or stock\n- Never create new product names\n- Never provide discounts unless mentioned in sheet\n- Never answer questions outside business scope\n- No politics, religion, personal matters, or unrelated topics\n- Maximum 2-3 emojis\n- No markdown formatting in customer-facing replies\n- Never invent customer information\n\n=== FALLBACK RESPONSE ===\nIf customer asks something outside available data:\nBangla: আমি একজন AI chatbot, এই তথ্যটি এই মুহূর্তে জানা নেই। একজন প্রতিনিধির কাছে আপনার মেসেজটি ট্রান্সফার করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন।\nEnglish: I am an AI chatbot. I do not have this information right now. I am transferring your message to a human representative. Please wait for assistance.\n\n=== CURRENT DATE ===\nToday is: {{ $now.format('yyyy-MM-dd') }}\nUse this for the Order Date field."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        1008
+      ],
+      "id": "93a9921f-08ce-49e9-acfb-efcdde717ce5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        848,
+        1216
+      ],
+      "id": "3731dde2-530d-475f-a99d-0649ce743a72",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Gemini account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        1424
+      ],
+      "id": "a9117f37-99b0-49e2-a161-9d875317ff96",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Save a confirmed customer order to the Orders Google Sheet. Call this ONLY after collecting and confirming all order details from the customer.\n\nIMPORTANT: This tool uses Map Automatically mode. The JSON keys you pass MUST exactly match these column headers (case-sensitive, with spaces):\n\nRequired input fields:\n- Order Id: Auto-generated unique ID in format TSA-YYYYMMDD-XXXX (e.g., TSA-20260505-7382)\n- Customer Name: Full name of the customer\n- Customer Phone: Bangladeshi mobile number (at least 11 digits)\n- Customer Address: Complete delivery address including district, thana, area, house/shop number\n- Order Date: Today's date in YYYY-MM-DD format\n- Order Product: Product name and quantity (e.g., \"Classic Heritage Check Shirt x 50\")\n- Order Amount: Total amount in Taka (Product Price × Quantity), numbers only without commas or currency text\n\nExample call:\n{\n  \"Order Id\": \"TSA-20260505-7382\",\n  \"Customer Name\": \"Rahim Uddin\",\n  \"Customer Phone\": \"01712345678\",\n  \"Customer Address\": \"House 12, Road 5, Mirpur 10, Dhaka\",\n  \"Order Date\": \"2026-05-05\",\n  \"Order Product\": \"Classic Heritage Check Shirt x 50\",\n  \"Order Amount\": \"27500\"\n}\n\nDO NOT call this tool if any field is missing or if the customer has not explicitly confirmed the order.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order Id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Id', ``, 'string') }}",
+            "Customer Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', ``, 'string') }}",
+            "Customer Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Address', ``, 'string') }}",
+            "Customer Phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Phone', ``, 'string') }}",
+            "Order Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Date', ``, 'string') }}",
+            "Order Product": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Product', ``, 'string') }}",
+            "Order Amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Amount', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Order Id",
+              "displayName": "Order Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Phone",
+              "displayName": "Customer Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Address",
+              "displayName": "Customer Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Date",
+              "displayName": "Order Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Product",
+              "displayName": "Order Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Amount",
+              "displayName": "Order Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        1216
+      ],
+      "id": "d46602f5-91fe-402e-9c98-ac0bf5af27c8",
+      "name": "Save_Order",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Fetch product information from the Tailspin Apparel Products sheet. Returns rows with these columns: Product Name, Product Description, Product Price, Key Features, Product Stock.\n\nCall this tool whenever the customer:\n- Asks for the price of any shirt\n- Asks about stock availability\n- Asks for product details, description, or features\n- Mentions a specific shirt name\n- Asks what products are available\n- Wants to place an order (to verify the product exists and get the price for calculating Order Amount)\n\nUsage:\n- To search for a specific product, filter by 'Product Name' column.\n- To get all products, retrieve without filters.\n- Use the exact data returned. Never guess or invent product details.\n- If no product matches, inform the customer that the product is not in the list.\n\nNever use this tool for saving orders — use Save_Order for that.",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Products",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        1200
+      ],
+      "id": "f4a37168-6f3a-47a4-90b3-4cded2669e67",
+      "name": "Get_Products",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save_Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Products": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
