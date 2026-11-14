@@ -19,6 +19,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [Facebook Page AI Sales & Order Chatbot](n8n/facebook-page-order-chatbot/) | Bilingual Messenger bot that answers from a live product sheet and saves confirmed orders | Gemini, Google Sheets, Meta Graph API |
 | [AI UGC Product Ad Generator (Nano Banana + Veo 3.1)](n8n/ai-ugc-image-to-video-nanobanana-veo/) | Turns a product photo into a UGC-style lifestyle image and a short AI video ad | OpenAI, Vertex AI (Nano Banana, Veo 3.1), Google Sheets, Google Drive |
 | [WhatsApp Client Task Intake to ClickUp & Slack](n8n/whatsapp-task-intake-clickup/) | AI agent turns client WhatsApp messages (text, voice, images, docs) into assigned ClickUp tasks | WhatsApp Cloud API, OpenAI, ClickUp, Slack, Google Sheets |
+| [AI Voice Outbound Lead Dispatcher (Retell AI)](n8n/ai-voice-outbound-lead-dispatcher/) | Calls queued leads from a sheet with a Retell AI voice agent (part 1 of an AI calling system) | Retell AI, Google Sheets |
 
 ## Make.com Workflows
 
