@@ -1,0 +1,986 @@
+{
+  "name": "AI Carousel Content Generator & Auto-Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        560
+      ],
+      "id": "d827bbfd-f906-4c0c-b0a1-ade50210a29e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        1200
+      ],
+      "id": "f117b95b-de08-4113-8bc1-f666a4205c55",
+      "name": "Manual Trigger (Test)"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -336,
+        560
+      ],
+      "id": "4d9507dc-6e91-4e62-9012-8f70b2eadc1c",
+      "name": "Get Topics from Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "filter-status-empty",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -112,
+        560
+      ],
+      "id": "bfe79e34-fe73-47d8-bcdc-f97175ad9805",
+      "name": "Filter: Only Unprocessed Topics"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        112,
+        560
+      ],
+      "id": "cd4d4677-4d77-46a2-a6bb-d0d1f8c794ea",
+      "name": "Limit: 1 Topic at a Time"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a Senior AI Implementation Consultant and Educator for Northwind Digital Solutions Inc..\n\nYour goal is to create educational carousel content about AI automation for business owners, operators, and managers.\n\nUSER TOPIC: \"{{ $json[\"Topic \"] }}\"\n\nCreate a 4-slide LinkedIn/Instagram carousel that teaches the audience HOW AI solves a real business problem related to the topic. Each slide must build on the previous one.\n\nSLIDE STRUCTURE:\n- Slide 1: HOOK — Bold problem statement or shocking fact (grabs attention)\n- Slide 2: THE PROBLEM & AI SOLUTION — What the manual process costs and how AI solves it\n- Slide 3: THE AUTOMATION IN ACTION — What AI does step by step and the business outcome\n- Slide 4: CTA — Call to action with booking link\n\nOUTPUT RULES:\n- Return ONLY valid JSON. No markdown. No backtick fences. No explanation text.\n- Strict JSON syntax only.\n\nJSON STRUCTURE:\n{\n  \"carousel_title\": \"...\",\n  \"caption\": \"...\",\n  \"hashtags\": [\"#tag1\", \"#tag2\"],\n  \"seo_keywords\": [\"keyword1\", \"keyword2\"],\n  \"slides\": [\n    {\n      \"slide_number\": 1,\n      \"slide_type\": \"hook\",\n      \"headline\": \"...\",\n      \"body_text\": \"...\",\n      \"image_prompt\": \"...\"\n    }\n  ]\n}\n\nFIELD RULES:\n\ncarousel_title: Max 12 words. High-curiosity educational title. Examples: 'The AI Workflow Replacing Manual [Topic]' / 'How AI Fixes Broken [Topic] In Minutes'\n\ncaption: 4-6 sentences. Hook → Problem → AI Logic → Outcome → CTA. End with: 'Want the full workflow blueprint? Book here: https://cal.com/{{BOOKING_SLUG}}'\n\nhashtags: Exactly 5 hashtags. Always include: #NorthwindDigital #AIEducation. Add 3 topic-relevant ones.\n\nseo_keywords: 10-12 keywords targeting AI business automation education.\n\nFor each of the 6 slides:\n\nheadline: Max 8 words. Bold punchy text. Uppercase preferred. The main message of this slide.\n\nbody_text: 2-4 short sentences max. Plain simple language. Explain the concept clearly. No jargon.\n\nimage_prompt: Professional LinkedIn/YouTube-style thumbnail image prompt.\n  - Style: Commercial photography, Canon EOS R5, 8K, cinematic depth of field\n  - Environment: Modern business office, startup workspace, service business, or field service setting — vary per slide\n  - Include on-screen devices showing: CRM dashboards, automation pipelines, AI alerts, booking confirmations, SMS notifications — relevant to this slide's content\n  - Typography overlay: Large bold white uppercase sans-serif text on semi-transparent dark rectangle showing the slide HEADLINE (max 8 words)\n  - Logo placement: Include Northwind Digital Solutions logo (https://northwind-digital.example.com/logo.png) as small watermark in bottom-right corner\n  - NO robots, NO neon AI graphics, NO sci-fi visuals, NO holograms\n  - Color palette: white, oak wood, slate grey, soft blue\n  - Each slide image must look VISUALLY DIFFERENT from the others (different environment, different angle, different device)\n  - Slide 6 (CTA): Show a clean booking confirmation screen or calendar with text overlay showing the CTA message",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        336,
+        560
+      ],
+      "id": "a5cba888-5c9a-44fb-813f-215bf561672f",
+      "name": "GPT: Generate Carousel Content",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse GPT output into structured carousel data\nconst raw = $input.first().json.message?.content ?? $input.first().json.content ?? '';\n\nlet parsed = {};\n\n// Try direct JSON parse\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  // Fallback: extract first JSON block\n  const match = raw.match(/\\{[\\s\\S]*\\}/);\n  if (match) {\n    try {\n      parsed = JSON.parse(match[0]);\n    } catch (e2) {\n      throw new Error('Failed to parse GPT JSON output: ' + raw.slice(0, 200));\n    }\n  }\n}\n\nif (!parsed.slides || !Array.isArray(parsed.slides)) {\n  throw new Error('No slides array found in GPT output');\n}\n\n// Normalize hashtags\nconst hashtagsArray = Array.isArray(parsed.hashtags)\n  ? parsed.hashtags.map(h => String(h).trim()).filter(Boolean)\n  : [];\n\nconst hashtagsString = hashtagsArray.join(' ');\n\n// Normalize SEO keywords\nconst seoArray = Array.isArray(parsed.seo_keywords)\n  ? parsed.seo_keywords.map(k => String(k).trim()).filter(Boolean)\n  : [];\n\nreturn [{\n  json: {\n    carousel_title: String(parsed.carousel_title || '').trim(),\n    caption: String(parsed.caption || '').trim(),\n    hashtags: hashtagsString,\n    hashtags_array: hashtagsArray,\n    seo_keywords: seoArray.join(', '),\n    slides: parsed.slides,\n    slide_count: parsed.slides.length,\n    topic: $('Limit: 1 Topic at a Time').item.json.Topic\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        560
+      ],
+      "id": "192ed673-3022-41e9-8b55-616cae680220",
+      "name": "Parse Carousel JSON"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Carousel Title": "={{ $json.carousel_title }}",
+            "Hashtags": "={{ $json.hashtags }}",
+            "row_number": 0,
+            "Topic ": "={{ $('Limit: 1 Topic at a Time').item.json[\"Topic \"] }}",
+            "Slide Count": "={{ $json.slide_count }}",
+            "Captions ": "={{ $json.caption }}"
+          },
+          "matchingColumns": [
+            "Topic "
+          ],
+          "schema": [
+            {
+              "id": "Topic ",
+              "displayName": "Topic ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status ",
+              "displayName": "Status ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Carousel Title",
+              "displayName": "Carousel Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Captions ",
+              "displayName": "Captions ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keywords ",
+              "displayName": "Keywords ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Slide Count",
+              "displayName": "Slide Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        560
+      ],
+      "id": "41bf3793-c9cf-4e72-be36-c2935fc074c5",
+      "name": "Update Sheet: Status = Generating",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split slides array into individual items for looping\nconst carouselData = $('Parse Carousel JSON').item.json;\n\nreturn carouselData.slides.map(slide => ({\n  json: {\n    ...slide,\n    carousel_title: carouselData.carousel_title,\n    caption: carouselData.caption,\n    hashtags: carouselData.hashtags,\n    seo_keywords: carouselData.seo_keywords,\n    topic: carouselData.topic,\n    slide_count: carouselData.slide_count\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        560
+      ],
+      "id": "222abc32-db85-4f9b-8cfc-55c51226e49d",
+      "name": "Split Slides into Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1360,
+        560
+      ],
+      "id": "916bb4b5-e074-40f7-bbf6-a7f2c5542376",
+      "name": "Loop Over Slides"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": {{ JSON.stringify($json.image_prompt) }}\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 32768,\n    \"responseModalities\": [\"IMAGE\"],\n    \"topP\": 0.95\n  },\n  \"safetySettings\": [\n    { \"category\": \"HARM_CATEGORY_HATE_SPEECH\", \"threshold\": \"OFF\" },\n    { \"category\": \"HARM_CATEGORY_DANGEROUS_CONTENT\", \"threshold\": \"OFF\" },\n    { \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\", \"threshold\": \"OFF\" },\n    { \"category\": \"HARM_CATEGORY_HARASSMENT\", \"threshold\": \"OFF\" }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        176
+      ],
+      "id": "e808cc68-cc27-43f1-96e0-8fe885b2b00a",
+      "name": "Gemini: Generate Slide Image",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "=candidates[0].content.parts[0].inlineData.data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2032,
+        176
+      ],
+      "id": "0e1bad3c-0003-4f13-b104-ebc8fd21a3c1",
+      "name": "Convert Image to Binary"
+    },
+    {
+      "parameters": {
+        "name": "=carousel_{{ $('Loop Over Slides').item.json.topic.replace(/[^a-zA-Z0-9]/g, '_') }}_slide_{{ $('Loop Over Slides').item.json.slide_number }}.png",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2256,
+        176
+      ],
+      "id": "ccf13e70-2103-4d38-8ec9-ba135daf7a0d",
+      "name": "Upload Slide to Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/media",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "{{BLOTATO_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "=http://drive.google.com/uc?export=download&id={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        176
+      ],
+      "id": "fac67a86-1571-451e-a410-42bab7eae151",
+      "name": "Upload Slide to Blotato Media"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Store the blotato URL and slide metadata for aggregation\nconst slideData = $('Loop Over Slides').item.json;\nconst blotatoUrl = $json.url;\n\nreturn [{\n  json: {\n    slide_number: slideData.slide_number,\n    slide_type: slideData.slide_type,\n    headline: slideData.headline,\n    blotato_url: blotatoUrl,\n    topic: slideData.topic,\n    carousel_title: slideData.carousel_title,\n    caption: slideData.caption,\n    hashtags: slideData.hashtags,\n    seo_keywords: slideData.seo_keywords,\n    slide_count: slideData.slide_count\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        544
+      ],
+      "id": "adc6bc1b-3e77-4e57-a7e5-cc7147ea14bb",
+      "name": "Collect Slide URL"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        560
+      ],
+      "id": "57ea7a7c-b0a1-4ae7-8abc-25e8d050b9bc",
+      "name": "Aggregate: Collect All Slide URLs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build final mediaUrls array from all collected slide URLs\nconst allItems = $input.first().json.data;\n\n// Sort by slide number to ensure correct order\nallItems.sort((a, b) => a.slide_number - b.slide_number);\n\nconst mediaUrls = allItems.map(item => item.blotato_url).filter(Boolean);\n\n// Get metadata from first slide (shared across all)\nconst meta = allItems[0];\n\nreturn [{\n  json: {\n    media_urls: mediaUrls,\n    media_urls_json: JSON.stringify(mediaUrls),\n    carousel_title: meta.carousel_title,\n    caption: meta.caption,\n    hashtags: meta.hashtags,\n    seo_keywords: meta.seo_keywords,\n    topic: meta.topic,\n    slide_count: mediaUrls.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        560
+      ],
+      "id": "1a70129a-67b3-4b98-84cd-71b5f5b0a034",
+      "name": "Build Final Carousel Payload"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"blotato_api_key\": \"{{BLOTATO_API_KEY}}\",\n  \"instagram_id\": \"{{INSTAGRAM_ID}}\",\n  \"facebook_id\": \"{{FACEBOOK_ID}}\",\n  \"facebook_page_id\": \"{{FACEBOOK_PAGE_ID}}\",\n  \"linkedin_id\": \"{{LINKEDIN_ID}}\",\n  \"linkedin_page_id\": \"{{LINKEDIN_PAGE_ID}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        560
+      ],
+      "id": "3834d783-dceb-47a5-9775-9d216e8971a6",
+      "name": "Prepare for Publish"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Prepare for Publish').item.json.blotato_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"instagram\"\n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Build Final Carousel Payload').item.json.caption + '\\n\\n' + $('Build Final Carousel Payload').item.json.hashtags) }},\n      \"platform\": \"instagram\",\n      \"mediaUrls\": {{ $('Build Final Carousel Payload').item.json.media_urls_json }}\n    },\n    \"accountId\": \"{{ $('Prepare for Publish').item.json.instagram_id }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2256,
+        368
+      ],
+      "id": "d953a99f-ccc1-47ee-b70e-0ae150fecade",
+      "name": "[Instagram] Post Carousel",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Prepare for Publish').item.json.blotato_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"linkedin\",\n      \"pageId\": \"{{ $('Prepare for Publish').item.json.linkedin_page_id }}\"\n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Build Final Carousel Payload').item.json.caption + '\\n\\n' + $('Build Final Carousel Payload').item.json.hashtags) }},\n      \"platform\": \"linkedin\",\n      \"mediaUrls\": {{ $('Build Final Carousel Payload').item.json.media_urls_json }}\n    },\n    \"accountId\": \"{{ $('Prepare for Publish').item.json.linkedin_id }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2256,
+        560
+      ],
+      "id": "89984b83-cd49-4910-be8c-f49a30f9c32a",
+      "name": "[LinkedIn] Post Carousel",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Prepare for Publish').item.json.blotato_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"target\": {\n      \"targetType\": \"facebook\",\n      \"pageId\": \"{{ $('Prepare for Publish').item.json.facebook_page_id }}\"\n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Build Final Carousel Payload').item.json.caption + '\\n\\n' + $('Build Final Carousel Payload').item.json.hashtags) }},\n      \"platform\": \"facebook\",\n      \"mediaUrls\": [{{ JSON.stringify($('Build Final Carousel Payload').item.json.media_urls[0]) }}]\n    },\n    \"accountId\": \"{{ $('Prepare for Publish').item.json.facebook_id }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2256,
+        752
+      ],
+      "id": "29462704-0a40-4b24-8073-fbf2a5911ec1",
+      "name": "[Facebook] Post Cover Image",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Topic": "={{ $('Limit: 1 Topic at a Time').item.json[\"Topic \"] }}",
+            "Status": "Done",
+            "Slide Count": "={{ $('Build Final Carousel Payload').item.json.slide_count }}"
+          },
+          "matchingColumns": [
+            "Topic"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Slide Count",
+              "displayName": "Slide Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -560,
+        976
+      ],
+      "id": "213359a5-bff8-4e1a-aa73-29ea1afc0283",
+      "name": "Update Sheet: Status = Done",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# STEP 1: Schedule & Fetch Topics\nRuns daily at 11am OR manually.\nFilters only rows where Status is empty.\nProcesses ONE topic at a time.",
+        "height": 188,
+        "width": 512,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -720,
+        -512
+      ],
+      "typeVersion": 1,
+      "id": "a27b6513-df40-4e9b-8e20-938645f271bb",
+      "name": "Note: Step 1"
+    },
+    {
+      "parameters": {
+        "content": "# STEP 2: GPT-4o-mini Generates Full Carousel\nOutputs JSON with 6 slides.\nEach slide has: headline, body_text, image_prompt.\nAlso outputs caption, hashtags, SEO keywords.",
+        "height": 220,
+        "width": 560,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "ee61c480-c0e9-44e9-8053-d6d863923ab3",
+      "name": "Note: Step 2"
+    },
+    {
+      "parameters": {
+        "content": "# STEP 3: Loop — Generate 1 Image Per Slide\nSplits 6 slides into individual items.\nLoop Over Slides processes one at a time.\nGemini 2.5 Flash generates each image.\nUploads to Google Drive → then to Blotato Media.",
+        "height": 220,
+        "width": 720,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        -512
+      ],
+      "typeVersion": 1,
+      "id": "21182bee-7578-400c-bfcc-6821323e13fd",
+      "name": "Note: Step 3"
+    },
+    {
+      "parameters": {
+        "content": "# STEP 4: Aggregate & Build Payload\nAfter all 6 slides are processed:\n- Aggregate collects all slide URLs\n- Sorted by slide number\n- Built into mediaUrls array for Blotato",
+        "height": 220,
+        "width": 560,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1568,
+        -512
+      ],
+      "typeVersion": 1,
+      "id": "a484be38-ebc3-4b38-a017-0f5728f5a1a6",
+      "name": "Note: Step 4"
+    },
+    {
+      "parameters": {
+        "content": "# STEP 5: Publish Carousel\nInstagram → Carousel (all 6 images)\nLinkedIn → Carousel (all 6 images)\nFacebook → Cover image only (single image)\n\nTikTok/YouTube = not applicable for carousels.\nUpdate Sheet status to Done.",
+        "height": 220,
+        "width": 720,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2192,
+        -512
+      ],
+      "typeVersion": 1,
+      "id": "a8cf884f-8b40-4ef0-aeb1-1921fadee372",
+      "name": "Note: Step 5"
+    },
+    {
+      "parameters": {
+        "content": "⚠️ IMPORTANT: After Loop Over Slides finishes all batches,\nit connects to Aggregate node via the TOP output (done branch).\nThe BOTTOM output (loop branch) goes back into the image generation chain.",
+        "height": 140,
+        "width": 600,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1712,
+        1456
+      ],
+      "typeVersion": 1,
+      "id": "d11d77a3-08b4-49f5-bf94-799c5aee123b",
+      "name": "Note: Loop Warning"
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1808,
+        176
+      ],
+      "id": "bd4ab68b-a670-4dc2-b2aa-4a4f1f167c75",
+      "name": "Wait",
+      "webhookId": "{{WEBHOOK_ID}}"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Topics from Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger (Test)": {
+      "main": [
+        []
+      ]
+    },
+    "Get Topics from Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter: Only Unprocessed Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Only Unprocessed Topics": {
+      "main": [
+        [
+          {
+            "node": "Limit: 1 Topic at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit: 1 Topic at a Time": {
+      "main": [
+        [
+          {
+            "node": "GPT: Generate Carousel Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT: Generate Carousel Content": {
+      "main": [
+        [
+          {
+            "node": "Parse Carousel JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Carousel JSON": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet: Status = Generating",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet: Status = Generating": {
+      "main": [
+        [
+          {
+            "node": "Split Slides into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Slides into Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Slides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Slides": {
+      "main": [
+        [
+          {
+            "node": "Aggregate: Collect All Slide URLs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gemini: Generate Slide Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini: Generate Slide Image": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Image to Binary": {
+      "main": [
+        [
+          {
+            "node": "Upload Slide to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Slide to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Upload Slide to Blotato Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Slide to Blotato Media": {
+      "main": [
+        [
+          {
+            "node": "Collect Slide URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Slide URL": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Slides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate: Collect All Slide URLs": {
+      "main": [
+        [
+          {
+            "node": "Build Final Carousel Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Carousel Payload": {
+      "main": [
+        [
+          {
+            "node": "Prepare for Publish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for Publish": {
+      "main": [
+        [
+          {
+            "node": "[Instagram] Post Carousel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "[LinkedIn] Post Carousel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[LinkedIn] Post Carousel": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Convert Image to Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/New_York",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
