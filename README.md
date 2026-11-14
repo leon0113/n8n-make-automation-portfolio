@@ -8,6 +8,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | Workflow | What it does | Tools |
 | --- | --- | --- |
 | [Facebook & Instagram DM + Comment AI Auto-Reply](n8n/facebook-dm-comment-ai-auto-reply/) | Replies to comments and DMs with AI, qualifies leads, and logs them to a CRM | OpenAI, Gemini, Meta Graph API, Supabase, Google Docs |
+| [AI Long-Form Video Generator (Veo 3.1)](n8n/ai-long-form-video-veo/) | Turns a topic into a 30-second, 4-scene AI video ad with script, SEO metadata and subtitles | OpenAI, Vertex AI (Veo 3.1, Gemini), Google Sheets, Google Drive |
 
 ## Data Privacy
 

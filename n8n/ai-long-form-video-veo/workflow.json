@@ -1,0 +1,1060 @@
+{
+  "name": "AI Long-Form Video Generator (Veo 3.1 Multi-Scene)",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Topic }}",
+        "options": {
+          "systemMessage": "=ROLE: You are a Creative Director for \"Northwind AI Call Solutions\", a B2B AI automation company that provides 24/7 AI call answering, qualification, and appointment booking for local service businesses.\n\nThese businesses include (but are not limited to):\nHVAC contractors, plumbers, electricians, roofers, general contractors, appliance repair companies, restoration services, mechanical contractors, supply stores, equipment repair businesses, and other high-call-volume local service providers.\n\nTASK:\nYou will receive a \"Topic\" (1–2 lines).\nYou must generate a complete B2B marketing package promoting Northwind AI Call Solutions as the solution that prevents missed calls and lost revenue for HVAC companies and contractors who lose emergency or urgent after-hours service calls.\n\nAUDIENCE & TARGETING (CRITICAL):\n- Primary audience: HVAC business owners and contractors\n- Secondary audience: Plumbers, electricians, roofers, and other trade contractors\n- Pain point focus: Emergency and urgent after-hours calls going unanswered\n- The prospect is a business owner who has lost revenue because no one answered the phone after hours during an emergency\n\nHere is the topic:\n{{ $json.Topic }}\n\nCORE POSITIONING RULES (CRITICAL):\n- This is NOT a consumer repair ad.\n- The target audience is BUSINESS OWNERS — specifically HVAC contractors and trade contractors.\n- Focus on: Missed emergency calls after hours, Overnight/weekend revenue loss, Slow response time during urgent situations, Overwhelmed staff during peak season, Competitor answering the emergency call first.\n- The solution is: 24/7 AI answering, Instant emergency call pickup, Lead qualification, Appointment booking, SMS/email summary to owner.\n- Never promote repair services.\n- Never position Northwind as a technician.\n- Never position Northwind as a contractor.\n- Northwind provides AI call automation.\n\nVIDEO NARRATIVE STRUCTURE (B2B - 30 SECONDS TOTAL — 4 SCENARIOS):\nYou are generating a 4-scene video where EACH SCENE presents a DIFFERENT but related emergency/after-hours scenario. Together the 4 scenes show the breadth of after-hours call loss that HVAC and contractor businesses face — and how Northwind solves all of it. Each scene is approximately 7.5 seconds. Scenes 1–3 show the PROBLEM in three different real-world emergency situations. Scene 4 shows the AI SOLUTION and positive outcome across all scenarios, ending with the brand card.\n\nSCENE 1 (~0–7.5s): EMERGENCY SCENARIO #1 — AFTER-HOURS FURNACE FAILURE\n- Show a residential or commercial HVAC client calling a contractor after hours (e.g., 11 PM) with a furnace emergency — no one answers, call goes to voicemail\n- Visual focus: Dark office, phone ringing unanswered, caller ID showing \"Furnace Emergency\" or similar\n- Audio: Phone ringing, voicemail beep, frustrated caller hanging up\n- NO ON-SCREEN TEXT\n\nSCENE 2 (~7.5–15s): EMERGENCY SCENARIO #2 — WEEKEND AC BREAKDOWN (SUMMER PEAK)\n- Show a business owner missing an urgent Saturday afternoon AC failure call because staff is off\n- Visual: Missed call notification on a business phone or owner's mobile, sunny exterior showing it's a hot weekend day\n- The caller immediately calls a competitor who answers\n- Audio: Notification chime, ambient summer sounds, competitor phone being answered in background\n- NO ON-SCREEN TEXT\n\nSCENE 3 (~15–22.5s): EMERGENCY SCENARIO #3 — OVERNIGHT PIPE/HVAC COMMERCIAL EMERGENCY\n- Show a commercial client (office building or restaurant) calling at 2 AM with an HVAC or mechanical emergency — contractor's line rings out, no answer\n- Visual: Empty contractor office at night, multiple missed calls stacking up on screen, client looking frustrated\n- Audio: Repeated ringing, silence, ambient night sounds\n- NO ON-SCREEN TEXT\n\nSCENE 4 (~22.5–30s): THE AI SOLUTION + BRAND END CARD\n- First 5 seconds: Show Northwind AI instantly answering all three types of emergency calls — quick montage of phone being answered immediately, AI qualification flow on screen, appointment confirmations being sent to the business owner's phone at various hours (11 PM, Saturday, 2 AM)\n- Owner shown next morning reviewing a full overnight appointment schedule on tablet — relaxed, confident\n- Final 2 seconds: Clean white or navy blue gradient background\n- END CARD TEXT (EXACTLY AS WRITTEN): \"Northwind HVAC service\" in clean, professional font\n- Tagline below logo: \"Never Miss Another Service Call\"\n- Color scheme: Navy blue (#1e3a8a) and white\n- NO OTHER TEXT on end card\n\nTOPIC ALIGNMENT REQUIREMENTS (CRITICAL):\n1. All 4 scenes must revolve around the same core theme: HVAC and contractor businesses losing emergency and after-hours calls\n2. Scenes 1–3 each show a DIFFERENT emergency scenario (different time, different situation, different caller type)\n3. Scene 4 shows AI resolving ALL of these scenarios simultaneously + end card\n4. Visual continuity: Same cinematic style, color grade, and professional tone across all scenes\n5. Logical flow: A viewer should understand — \"This happens, and this happens, and this happens — and Northwind fixes all of it\"\n6. Business types shown should include HVAC contractors specifically, with optional secondary contractor types in scenes 2–3\n\nVEO 3 TECHNICAL SPECIFICATIONS:\n- Duration per prompt: Exactly 7.5 seconds\n- Camera: Specify camera model, lens, movement (e.g., \"Sony FX6, 24-70mm lens, slow dolly forward\")\n- Lighting: Specify lighting setup (e.g., \"Natural window light, golden hour\", \"Cool fluorescent office lighting\")\n- Audio cues: Include ambient sounds for each scene\n- Shot type: Specify (wide shot, medium shot, close-up, POV, etc.)\n- Movement: Smooth, professional (slow push, pan, static, handheld)\n- Realism: Photorealistic business environments, authentic office settings, real-world lighting\n- NO TEXT OVERLAYS except in Scene 4 end card (exactly \"Northwind HVAC service\")\n- Ensure each prompt can stand alone but flows into the next scene\n\nCAMERA & REALISM RULES:\n- Use professional cinema cameras: Sony FX6, RED Komodo, Canon C70, ARRI Alexa Mini\n- Lens specifications: 24-70mm f/2.8 for versatility, 50mm f/1.4 for close-ups, 16-35mm for wide shots\n- Lighting: Natural, motivated lighting - window light, practical lamps, office fluorescents\n- Skin texture: Visible pores, natural skin tone variation, realistic complexion\n- Fabric detail: Clothing wrinkles, fabric texture, realistic drape\n- Environmental detail: Dust particles in light, weathered surfaces, lived-in spaces\n- Imperfections: Slight camera shake (if handheld), natural focus breathing, real-world messiness\n- Color grading: Cinematic but naturalistic, avoid over-saturation\n- Depth of field: Appropriate to lens and distance, natural bokeh\n- NO text, NO subtitles, NO on-screen graphics (except Scene 4 end card)\n\nOUTPUT FORMAT (STRICT JSON ONLY):\nYou must output valid JSON with no trailing commas. Follow this exact structure:\n\n{\n  \"ad_script\": \"25 to 35 second B2B voiceover script that narrates all 4 emergency scenarios and the AI solution — written for HVAC and contractor business owners\",\n  \"post_title\": \"8 to 12 word compelling B2B title targeting HVAC and contractor owners\",\n  \"description\": \"150 to 250 word B2B description focusing on after-hours emergency call loss, business pain points, and ROI for HVAC and contractor businesses\",\n  \"keywords\": \"20 to 30 relevant B2B keywords including HVAC, contractor, emergency calls, after-hours answering\",\n  \"hashtags\": \"15 to 20 industry-specific hashtags for HVAC and contractor audiences\",\n  \"image_prompt\": \"Detailed B2B promotional image prompt showing an HVAC contractor business owner reviewing after-hours emergency bookings on a tablet — AI solution in action\",\n  \"veo_prompts\": [\n    \"SCENE 1 (7.5 seconds): After-hours furnace emergency call going unanswered at an HVAC contractor office. Detailed prompt with camera specs, lighting, specific visual storytelling. Include: Camera model and lens, shot type, movement, lighting conditions (dark/night), ambient audio (ringing phone, voicemail), caller ID visible showing emergency call. NO TEXT OVERLAYS.\",\n    \"SCENE 2 (7.5 seconds): Weekend AC breakdown — missed call on business phone, caller immediately dialing competitor who answers. Must show Saturday daytime setting, sunny exterior, missed call notification, and competitor answering in contrast. Include: Camera specs, visual continuity with Scene 1 cinematic style. NO TEXT OVERLAYS.\",\n    \"SCENE 3 (7.5 seconds): Overnight commercial HVAC or mechanical emergency — 2 AM, contractor office dark and empty, multiple missed calls stacking up, frustrated commercial client. Include: Camera specs, night lighting, ambient sounds, visual of missed call stack. NO TEXT OVERLAYS.\",\n    \"SCENE 4 (7.5 seconds): First 5 seconds — rapid montage of Northwind AI answering all three types of emergency calls instantly (11 PM furnace, Saturday AC, 2 AM commercial), appointment confirmations sent to owner's phone, owner next morning reviewing full booking schedule on tablet — relaxed and confident. Final 2 seconds: Clean transition to white/navy gradient background with end card showing EXACTLY: Northwind HVAC service (professional font, navy blue #1e3a8a) with tagline Never Miss Another Service Call below. NO OTHER TEXT.\"\n  ],\n  \"post_date\": \"YYYY-MM-DD\"\n}\n\nCRITICAL JSON FORMATTING RULES:\n1. NO trailing commas after the last item in any array or object\n2. All string values must use double quotes, not single quotes\n3. Escape any double quotes within string values with backslash\n4. The veo_prompts array must have exactly 4 items\n5. Ensure all brackets and braces are properly closed\n6. Do not include any text outside the JSON structure\n7. Do not include explanatory comments within the JSON\n\nCRITICAL REMINDERS FOR VEO PROMPTS:\n1. Each prompt must be self-contained but narratively connected\n2. Specify exact camera and technical details in each prompt\n3. NO subtitles, NO text overlays (except Scene 4 end card)\n4. Scene 4 end card text must be EXACTLY: \"Northwind HVAC service\" — no variations, no typos\n5. All 4 scenes must address the core theme: HVAC/contractor after-hours emergency call loss\n6. Scenes 1–3 each present a DIFFERENT emergency scenario\n7. Visual continuity: consistent cinematic style, lighting tone, and professional look across all 4 scenes\n8. Each scene should be ~7.5 seconds of usable footage that stitches together seamlessly into a 30-second ad"
+        }
+      },
+      "id": "49d94486-ce26-4578-9e4d-dc1a837bef91",
+      "name": "AI Agent (Generate All)1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -3840,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}\n/locations/us-central1/publishers/google/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"contents\": [\n        {\n            \"role\": \"user\",\n            \"parts\": [\n                {\n                    \"text\": \"{{ $json.image_prompt }}\" \n                }\n            ]\n        }\n    ],\n    \"generationConfig\": {\n        \"temperature\": 0.7,\n        \"maxOutputTokens\": 32768,\n        \"responseModalities\": [\"IMAGE\"],\n        \"topP\": 0.95\n    },\n    \"safetySettings\": [\n        {\n            \"category\": \"HARM_CATEGORY_HATE_SPEECH\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_DANGEROUS_CONTENT\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_HARASSMENT\",\n            \"threshold\": \"OFF\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "id": "8b111913-4261-44db-9cc4-fc6fd83b5212",
+      "name": "Generate Image (Vertex)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2912,
+        2896
+      ],
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "candidates[0].content.parts[0].inlineData.data",
+        "binaryPropertyName": "image",
+        "options": {}
+      },
+      "id": "4bb80760-9e5e-4faf-9c5c-9de89d5fe487",
+      "name": "Convert Image to File1",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -2704,
+        2896
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "image",
+        "name": "={{ $('AI Agent (Generate All)1').item.json.Topic }}_image.png",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_IMAGE_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_IMAGE_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "id": "15ca25d8-d243-4ca3-990c-2a66295297d2",
+      "name": "Upload Image to Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2512,
+        2896
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ad Script": "={{ $('Code in JavaScript1').item.json.ad_script }}",
+            "FB/YT Title": "={{ $('Code in JavaScript1').item.json.post_title }}",
+            "Description": "={{ $('Code in JavaScript1').item.json.description }}",
+            "Keywords": "={{ $('Code in JavaScript1').item.json.keywords }}",
+            "Hashtags": "={{ $('Code in JavaScript1').item.json.hashtags }}",
+            "Post Date": "={{ $('Code in JavaScript1').item.json.post_date }}",
+            "ImageURLs": "={{ $json.webContentLink }}",
+            "Topic": "={{ $('Google Sheets Trigger').item.json.Topic }}",
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "Topic"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ad Script",
+              "displayName": "Ad Script",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FB/YT Title",
+              "displayName": "FB/YT Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keywords",
+              "displayName": "Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Date",
+              "displayName": "Post Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Comments",
+              "displayName": "Comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ImageURLs",
+              "displayName": "ImageURLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VideoURLs",
+              "displayName": "VideoURLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "bf1ae73d-b994-495d-9153-390cb468ba51",
+      "name": "Update Sheet (Text & Image)1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2304,
+        2896
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-fast-generate-preview:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"endpoint\": \"projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-fast-generate-preview\",\n  \"instances\": [\n    {\n      \"prompt\": \"{{ $json.veo_prompts }}\"\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": 8,\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": true,\n    \"includeRaiReason\": true,\n    \"generateAudio\": true,\n    \"resolution\": \"720p\",\n    \"seed\": {{ Math.floor(Math.random() * 1000000) }},\n    \"negativePrompt\": \"low quality, blurry, watermark, signature, cartoon, disfigured, bad anatomy, mumbling, gibberish, unintelligible speech, background noise, additional dialogue\",\n    \"guidanceScale\": 10\n  }\n}",
+        "options": {}
+      },
+      "id": "1c3163ba-b76b-4128-a424-3193b4a2fc85",
+      "name": "Start Veo Generation1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2944,
+        1584
+      ],
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 6,
+        "unit": "minutes"
+      },
+      "id": "26798e62-777e-42e5-b039-b7ca3e748cb3",
+      "name": "Wait 60s1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -2720,
+        1584
+      ],
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-generate-preview:fetchPredictOperation",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"operationName\": \"{{ $json.name }}\"\n}",
+        "options": {}
+      },
+      "id": "b6f756b0-6953-48e0-ad14-aecf0e5a69ee",
+      "name": "Check Veo Status1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2496,
+        1584
+      ],
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond_1",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef1879d8-3241-4066-ab4c-6dc2bec476ec",
+      "name": "Is Video Ready?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2288,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "id": "206b52c8-9f13-4c1e-962b-224930a34df2",
+      "name": "Convert Video to File1",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -2048,
+        1488
+      ]
+    },
+    {
+      "parameters": {
+        "name": "=xyz_video.mp4",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_VIDEO_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Video",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_VIDEO_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "id": "cb7506fc-6d17-4cf7-bd5e-080c4fc3db81",
+      "name": "Upload Video to Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1184,
+        1488
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "VideoURLs": "={{ $json.webContentLink }}",
+            "Topic": "={{ $('Get row(s) in sheet').item.json.Topic }}",
+            "row_number": 0,
+            "Ad Script": "={{ $('Code in JavaScript1').item.json.veo_prompts }}",
+            "FB/YT Title": "={{ $('Code in JavaScript1').item.json.post_title }}",
+            "Description": "={{ $('Code in JavaScript1').item.json.description }}",
+            "Keywords": "={{ $('Code in JavaScript1').item.json.keywords }}",
+            "Hashtags": "={{ $('Code in JavaScript1').item.json.hashtags }}",
+            "Post Date": "={{ $('Code in JavaScript1').item.json.post_date }}"
+          },
+          "matchingColumns": [
+            "Topic"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ad Script",
+              "displayName": "Ad Script",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FB/YT Title",
+              "displayName": "FB/YT Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Keywords",
+              "displayName": "Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post Date",
+              "displayName": "Post Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Comments",
+              "displayName": "Comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ImageURLs",
+              "displayName": "ImageURLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "VideoURLs",
+              "displayName": "VideoURLs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d7c98ae0-69cf-435f-9382-8f1d1797cafa",
+      "name": "Update Sheet (Video URL)1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        1488
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "d339bff0-09b4-45a7-aa0e-a8d388d01ba0",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3984,
+        2624
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets Trigger account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "51c02060-5ac0-46a9-a78a-7bf10ddde080",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -3840,
+        1808
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  let rawText = item.json.output;\n  \n  if (rawText) {\n    try {\n      // Remove Markdown code block wrappers (both ```json and ```)\n      let cleanJsonString = rawText\n        .replace(/^```json\\s*/i, \"\")\n        .replace(/^```\\s*/i, \"\")\n        .replace(/\\s*```$/g, \"\")\n        .trim();\n      \n      // Parse the JSON\n      let parsedData = JSON.parse(cleanJsonString);\n      \n      // Clean up image_prompt\n      if (parsedData.image_prompt) {\n        parsedData.image_prompt = parsedData.image_prompt\n          .replace(/\\r\\n/g, \"\\n\")\n          .replace(/\\s+/g, \" \")\n          .trim();\n      }\n      \n      // Clean up veo_prompts array - ALL 4 SCENES\n      if (Array.isArray(parsedData.veo_prompts)) {\n        parsedData.veo_prompts = parsedData.veo_prompts\n          .map(prompt => {\n            return prompt\n              .replace(/\\r\\n/g, \"\\n\")\n              .replace(/\\s+/g, \" \")\n              .trim();\n          });\n      }\n      \n      // Normalize all text fields\n      const textFields = [\"ad_script\", \"post_title\", \"description\", \"keywords\", \"hashtags\"];\n      textFields.forEach(field => {\n        if (parsedData[field]) {\n          parsedData[field] = parsedData[field]\n            .replace(/\\r\\n/g, \"\\n\")\n            .replace(/\\s+/g, \" \")\n            .trim();\n        }\n      });\n      \n      // Replace the item with parsed data\n      item.json = parsedData;\n      \n    } catch (error) {\n      // If JSON parsing fails, log the error and keep original data\n      console.error(\"JSON parse error:\", error.message);\n      console.error(\"Raw text:\", rawText.substring(0, 200)); // Log first 200 chars for debugging\n      \n      // Optionally, you can set an error flag\n      item.json.parseError = true;\n      item.json.errorMessage = error.message;\n    }\n  }\n  \n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3488,
+        1584
+      ],
+      "id": "e439b37c-5627-4e76-b402-7e62949616fb",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "veo_prompts",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        1584
+      ],
+      "id": "d6ee7057-481d-46c5-9e95-ebff3e0ded7e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "file",
+        "options": {
+          "includeBinaries": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        1488
+      ],
+      "id": "4f33ecf1-61fc-485d-b4f9-0cc118763796",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "videoSources": {
+          "sources": [
+            {
+              "sourceType": "binary",
+              "binaryProperty": "file"
+            },
+            {
+              "sourceType": "binary",
+              "binaryProperty": "file_1"
+            },
+            {
+              "sourceType": "binary",
+              "binaryProperty": "file_2"
+            },
+            {
+              "sourceType": "binary",
+              "binaryProperty": "file_3"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-mediafx.mediaFX",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        1488
+      ],
+      "id": "c92c24ca-051b-4ed4-9d20-edf89471f2fc",
+      "name": "Merge video"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4656,
+        1584
+      ],
+      "id": "b5aef64b-0875-40d0-bb31-68718fc519b3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4448,
+        1584
+      ],
+      "id": "3bffbbdb-abbc-4a7f-bfe8-d7b0f7cd3e8a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "78cc4c18-f8be-4e1b-9ad8-db8e8de7d6b4",
+              "leftValue": "={{ $json[\"Ad Script\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -4240,
+        1584
+      ],
+      "id": "2b7fa076-867d-42ea-98c4-3764e64d664a",
+      "name": "Filter"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -4032,
+        1584
+      ],
+      "id": "84af7b8d-3e42-4cbf-ba16-d400ff4d7e05",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "resource": "subtitle",
+        "source": {
+          "source": {
+            "sourceType": "binary"
+          }
+        },
+        "text": "Call Northwind, to know more!",
+        "startTime": 20,
+        "endTime": 30,
+        "paddingY": 30
+      },
+      "type": "n8n-nodes-mediafx.mediaFX",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        1488
+      ],
+      "id": "7b7905f4-e352-44f2-ba3b-5ff74448946e",
+      "name": "AddText subtitle"
+    }
+  ],
+  "connections": {
+    "AI Agent (Generate All)1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image (Vertex)1": {
+      "main": [
+        [
+          {
+            "node": "Convert Image to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Image to File1": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to Drive1": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet (Text & Image)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet (Text & Image)1": {
+      "main": [
+        []
+      ]
+    },
+    "Start Veo Generation1": {
+      "main": [
+        [
+          {
+            "node": "Wait 60s1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 60s1": {
+      "main": [
+        [
+          {
+            "node": "Check Veo Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Veo Status1": {
+      "main": [
+        [
+          {
+            "node": "Is Video Ready?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Video Ready?1": {
+      "main": [
+        [
+          {
+            "node": "Convert Video to File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 60s1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Video to File1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to Drive1": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet (Video URL)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Generate All)1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Start Veo Generation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Merge video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge video": {
+      "main": [
+        [
+          {
+            "node": "AddText subtitle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Generate All)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddText subtitle": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
