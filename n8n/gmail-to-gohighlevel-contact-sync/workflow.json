@@ -1,0 +1,541 @@
+{
+  "name": "Gmail to GoHighLevel AI Contact Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{`https://services.leadconnectorhq.com/contacts/${$json.contacts[0].id}`}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  firstName: $json.FirstName && $json.FirstName.trim() !== '' ? $json.FirstName : 'Unknown',\n  lastName: $json.LastName && $json.LastName.trim() !== '' ? $json.LastName : ' ',\n  email: $json.Email,\n\n  phone: $json.Phone && $json.Phone.trim() !== '' ? $json.Phone : null,\n  address1: $json.Address && $json.Address.trim() !== '' ? $json.Address : null,\n\n  source: 'Email Lead',\n\n  tags: [\n    'Email Lead'\n  ],\n\n  locationId: '{{LOCATION_ID}}',\n\n  customFields: [\n    {\n      key: \"ai_sms_summary\",\n      field_value: \n        `Urgency: ${$json.Urgency && $json.Urgency.trim() !== '' ? $json.Urgency : 'No Urgency'} | ` +\n        `Service: ${$json.ServiceRequest && $json.ServiceRequest.trim() !== '' ? $json.ServiceRequest : 'General Inquiry'} | ` +\n        `Summary: ${$json.Summary && $json.Summary.trim() !== '' ? $json.Summary : 'No summary provided'}`\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "id": "96e6e219-59b5-405d-84fa-f0f2dea4cb33",
+      "name": "Update Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -544,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "-from:no-reply -from:noreply -from:donotreply -from:mailer-daemon -from:accounts.google.com -from:notifications -from:bounce",
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "id": "f68b3baf-03b1-43e7-accb-41286d411a45",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2240,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-001",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "no-reply",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-002",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "noreply",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-003",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "donotreply",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-004",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "mailer-daemon",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-005",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "accounts.google.com",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-006",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "notifications",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-007",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "bounce",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "cond-008",
+              "leftValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "151e3ae2-1724-47a8-b6f6-d7d9326f609d",
+      "name": "Is Real Sender?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1216,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  firstName: $('Format GHL Contact').item.json.FirstName && $('Format GHL Contact').item.json.FirstName.trim() !== '' \n    ? $('Format GHL Contact').item.json.FirstName.trim() \n    : 'Unknown',\n  lastName: $('Format GHL Contact').item.json.LastName && $('Format GHL Contact').item.json.LastName.trim() !== '' \n    ? $('Format GHL Contact').item.json.LastName.trim() \n    : ' ',\n  email: $('Format GHL Contact').item.json.Email,\n  phone: $('Format GHL Contact').item.json.Phone && $('Format GHL Contact').item.json.Phone.trim() !== '' \n    ? $('Format GHL Contact').item.json.Phone.trim() \n    : null,\n  address1: $('Format GHL Contact').item.json.Address && $('Format GHL Contact').item.json.Address.trim() !== '' \n    ? $('Format GHL Contact').item.json.Address.trim() \n    : null,\n  source: \"Email Lead\",\n  tags: [\"Email Lead\"],\n  locationId: \"{{LOCATION_ID}}\",\n  customFields: [\n    { key: \"ai_sms_summary\", field_value: $('Format GHL Contact').item.json.Urgency ?? \"No Urgency\" }\n  ]\n}) }}",
+        "options": {}
+      },
+      "id": "432591c7-496e-4dbb-99e3-6a7c9c185c34",
+      "name": "Create GHL Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -544,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}"
+      },
+      "id": "38cc28a3-f328-4eec-a4c7-a6a24a2821c1",
+      "name": "Mark as Read",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        576
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an assistant that extracts structured lead information from emails for GoHighLevel (GHL).\n\nAnalyze the email content and extract the following fields:\n\n- FirstName (given name)\n- LastName (family name)\n- Phone (any phone number found)\n- Address (full address or location details)\n- Urgency (High, Medium, Low based on tone/keywords)\n- ServiceRequest (what service the customer is asking for)\n- Summary (short 1–2 sentence summary of the request)\n\nRules:\n- If a field is missing, return \" \"\n- Do not guess or invent data\n- If only one name is found, put it in FirstName and set LastName to \" \"\n\nIMPORTANT OUTPUT RULES:\n- Return ONLY raw JSON\n- Do NOT wrap the response in quotes\n- Do NOT use markdown or code blocks\n- Do NOT add explanations or extra text\n- Output must start with { and end with }\n\nReturn this exact JSON format:\n{\n  \"FirstName\": \"\",\n  \"LastName\": \"\",\n  \"Phone\": \"\",\n  \"Address\": \"\",\n  \"Urgency\": \"\",\n  \"ServiceRequest\": \"\",\n  \"Summary\": \"\"\n}\n\nKnowledge Base:\nFrom: (Customer Name)\nPh: (Phone)\nAddress: (Address)\n...........................\nEmail Content:\n{{$json[\"emailBody\"]}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "89d88dbf-cf53-4972-89e6-38329131419b",
+      "name": "Summarize Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -1792,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "emailBody",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "82ad93cb-cae4-481c-9ac6-861b920b9ed7",
+      "name": "Prepare Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "FirstName",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).FirstName }}"
+            },
+            {
+              "name": "LastName",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).LastName }}"
+            },
+            {
+              "name": "Email",
+              "value": "={{ $('Gmail Trigger').item.json.from.value[0].address }}"
+            },
+            {
+              "name": "Phone",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).Phone }}"
+            },
+            {
+              "name": "Address",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).Address }}"
+            },
+            {
+              "name": "Urgency",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).Urgency }}"
+            },
+            {
+              "name": "ServiceRequest",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).ServiceRequest }}"
+            },
+            {
+              "name": "Summary",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).Summary }}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "88d3e06f-b299-45d4-8949-c3c8a9cadd6f",
+      "name": "Format GHL Contact",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{GHL_API_KEY}}"
+            },
+            {
+              "name": "Version",
+              "value": "2021-07-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"locationId\": \"{{LOCATION_ID}}\",\n  \"query\": $json.Email,\n  \"page\": 1,\n  \"pageLimit\": 1\n}) }}",
+        "options": {}
+      },
+      "id": "5cfa754f-f1bc-4e1f-8716-615ceba79cd8",
+      "name": "Search Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -992,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "b0247c1f-26ac-4b53-b950-36bad3cb38be",
+              "leftValue": "={{ $json.contacts.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            },
+            {
+              "id": "cd6d8a39-99f6-4f6e-adf8-1c243aee6085",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "60564acd-2a60-432c-b7b6-5546534d6b43",
+      "name": "Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        320
+      ]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Real Sender?": {
+      "main": [
+        [
+          {
+            "node": "Search Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create GHL Contact": {
+      "main": [
+        [
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Email": {
+      "main": [
+        [
+          {
+            "node": "Format GHL Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email": {
+      "main": [
+        [
+          {
+            "node": "Summarize Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format GHL Contact": {
+      "main": [
+        [
+          {
+            "node": "Is Real Sender?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Contact": {
+      "main": [
+        [
+          {
+            "node": "Contact Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Exists?": {
+      "main": [
+        [
+          {
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create GHL Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

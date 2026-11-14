@@ -14,6 +14,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [AI Website Audit & Lead Outreach Report](n8n/ai-website-audit-lead-report/) | Audits lead websites with AI, builds an HTML/PDF report and writes a personalized email sequence | OpenAI, Google Sheets, Google Drive, Jina Reader, PDFShift |
 | [HeyGen AI Avatar Video Auto-Publisher](n8n/heygen-avatar-video-autopublish-with-approval/) | Writes a script, gets Slack approval, renders a HeyGen avatar video and posts it to 4 platforms | OpenAI, HeyGen, Slack, Google Sheets, Google Drive, Blotato |
 | [Apify Lead Scraper with Email & Phone Validation](n8n/apify-lead-scraper-email-phone-validation/) | Scrapes Google Maps leads, finds emails, validates phone line types, scores leads and saves them to Sheets | Apify, NumLookup, Google Sheets |
+| [Gmail to GoHighLevel AI Contact Sync](n8n/gmail-to-gohighlevel-contact-sync/) | Extracts lead details from incoming emails with AI and creates or updates GoHighLevel contacts | Gmail, OpenAI, GoHighLevel |
 
 ## Data Privacy
 
