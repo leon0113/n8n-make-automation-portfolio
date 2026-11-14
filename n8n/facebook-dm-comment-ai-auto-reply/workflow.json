@@ -59,7 +59,7 @@
         2880,
         3312
       ],
-      "id": "a9bad33b-4bce-4b02-9f90-d3ff1d559878",
+      "id": "5c30cab4-c097-4ae5-8c8e-616333eb9ac8",
       "name": "Is Valid Comment?"
     },
     {
@@ -130,7 +130,7 @@
         3120,
         3312
       ],
-      "id": "5bbcbc38-cf23-4d23-aad3-a59866520e8a",
+      "id": "ef06511d-adfb-40a2-8665-1a3bcb1b68ba",
       "name": "Extract Comment Data"
     },
     {
@@ -181,7 +181,7 @@
         3360,
         3312
       ],
-      "id": "5a87a5fe-be39-4cc9-81b7-2c5e8ff106e8",
+      "id": "08ccc41e-0579-4404-a7d9-35daa0f9e90f",
       "name": "Quality Filter (Skip Spam/Short)"
     },
     {
@@ -198,7 +198,7 @@
         3600,
         3312
       ],
-      "id": "ba56a9bc-3a69-41a8-93b4-5271eb3c1602",
+      "id": "83200d59-6dbe-4a8a-b302-053c7a56eb18",
       "name": "AI Agent (Comment)"
     },
     {
@@ -221,7 +221,7 @@
         3472,
         3536
       ],
-      "id": "ec163c11-086c-49c5-b2fc-5bdb066eed39",
+      "id": "419bb764-4baf-40e7-ba62-49912387ea0f",
       "name": "OpenAI (Comment)",
       "credentials": {
         "openAiApi": {
@@ -241,7 +241,7 @@
         3888,
         3520
       ],
-      "id": "9af3366e-47bd-4c8f-86e3-5d582894c5ab",
+      "id": "0b40dc28-7ea8-401e-bb5b-be59e43a0b43",
       "name": "Knowledge Base (Google Docs)",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -262,7 +262,7 @@
         3680,
         3536
       ],
-      "id": "b55b6d63-2ee0-442d-b2e6-b1fcf193f9d8",
+      "id": "9bd36bdb-53bd-4bd0-ae7f-9b4f2766cd1d",
       "name": "Memory (Comment)"
     },
     {
@@ -303,7 +303,7 @@
         3904,
         3312
       ],
-      "id": "ad5d4f0a-c44e-45bd-b90e-2209162c9187",
+      "id": "74e7c54d-03e3-402d-b2ef-e79d3378c295",
       "name": "Clean AI Output"
     },
     {
@@ -316,7 +316,7 @@
         4080,
         3312
       ],
-      "id": "2e984db6-dcfb-4ca3-9eb0-ea8bc68822ef",
+      "id": "84dd796a-fd72-47b1-b09d-a6dc9cb5e8b6",
       "name": "Wait 10s (Anti-spam delay)",
       "webhookId": "{{WEBHOOK_ID}}"
     },
@@ -344,7 +344,7 @@
         4320,
         3312
       ],
-      "id": "4d3a6261-91e2-48c8-a8f4-d320fa6a0304",
+      "id": "18a6809f-3489-41e2-a210-6a3b0a95ff7f",
       "name": "Post Comment Reply"
     },
     {
@@ -361,7 +361,7 @@
         4560,
         3312
       ],
-      "id": "43c66b6e-ce20-41a4-bd13-cdab1171fc42",
+      "id": "235348ab-7317-4f65-9e24-c73f71e0f8bb",
       "name": "Respond 200 OK"
     },
     {
@@ -395,7 +395,7 @@
         4560,
         3072
       ],
-      "id": "a90c276f-ed1f-42d9-bef8-1cda2eef6b07",
+      "id": "3a7da2f0-8da5-44aa-9ded-1f0f2ee9efee",
       "name": "Reply Posted Successfully?"
     },
     {
@@ -443,7 +443,7 @@
         },
         "options": {}
       },
-      "id": "756ed68f-c260-4538-b1bb-f66d2a817dcf",
+      "id": "44b10a6f-12bb-48b7-a591-c215b96e8a94",
       "name": "Append Comment Chat History",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -521,7 +521,7 @@
         },
         "options": {}
       },
-      "id": "6c6702ec-b9cd-4896-86f7-0f55a981b132",
+      "id": "307d96d7-6487-48f5-bbe2-f52c6d858898",
       "name": "Upsert Comment Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -591,7 +591,7 @@
         },
         "options": {}
       },
-      "id": "8d1b510c-22e9-4fe8-a829-ac9094cd1bea",
+      "id": "bf9992e1-9edb-4d3a-a7e8-94c340892b4c",
       "name": "Log Execution Comment",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -614,7 +614,7 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "8ec2ad82-153b-4ce1-a0b4-1ccf0980b55a",
+      "id": "2ebd98dc-5968-4a3d-ac91-d62a6a59b795",
       "name": "Facebook Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
@@ -636,7 +636,7 @@
         2864,
         2224
       ],
-      "id": "c43f8c1d-1f3c-44d7-8ed8-1cf0641fc281",
+      "id": "f8366112-c623-4ad6-9ac0-87f5e07e1b88",
       "name": "Verify Webhook GET"
     },
     {
@@ -670,7 +670,7 @@
         2864,
         2464
       ],
-      "id": "435820b5-9d45-4301-bae5-211faa97f556",
+      "id": "58e8784a-5e21-461c-ab6a-56e51306006e",
       "name": "Is DM Message?"
     },
     {
@@ -717,7 +717,7 @@
         3056,
         2464
       ],
-      "id": "3ad2fa3c-3594-406f-ac6e-d9891fb1dde6",
+      "id": "44987180-1226-43d9-8d38-87e5eb57dc40",
       "name": "Extract DM Data"
     },
     {
@@ -740,7 +740,7 @@
         },
         "options": {}
       },
-      "id": "bd122436-9b9a-4f4b-ad4c-037b48cc57cb",
+      "id": "d838ed76-49ec-43d0-b674-e6793161f899",
       "name": "Get Contact Row",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -777,7 +777,7 @@
         },
         "options": {}
       },
-      "id": "83cd1399-4623-4a19-92fe-59acb2c7dc95",
+      "id": "9356ca2e-01a9-4ecf-95d4-516bf41226dd",
       "name": "Get DM Chat History",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -806,7 +806,7 @@
         3696,
         2464
       ],
-      "id": "cb12eca0-9cf4-4365-b7af-b0fa905b0256",
+      "id": "7f72d656-7e26-4d6b-b95c-6ed0b7dcf429",
       "name": "Merge DM Contact + History",
       "alwaysOutputData": true
     },
@@ -820,7 +820,7 @@
         3904,
         2464
       ],
-      "id": "3e732e15-3431-4673-8138-5827d0105bf2",
+      "id": "fc92684d-19ce-46c3-8669-714208b354e0",
       "name": "Merge Context",
       "alwaysOutputData": true
     },
@@ -855,7 +855,7 @@
         4128,
         2464
       ],
-      "id": "a82c9f23-3023-4540-b473-db4f1e0a8f84",
+      "id": "f96fa153-05ff-4fce-8bcf-7b041b661e23",
       "name": "If Contact Exists"
     },
     {
@@ -916,7 +916,7 @@
         },
         "options": {}
       },
-      "id": "ca78830d-0cfe-4304-9d4e-6d4cdcd98fab",
+      "id": "bb3738fc-6e4e-4ea2-8b58-0188ddc59a13",
       "name": "Create New Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -946,7 +946,7 @@
         4656,
         2448
       ],
-      "id": "799d32ab-aa17-497f-92d3-c471db306342",
+      "id": "8309d559-2926-4529-ad8b-d72f3ae2299e",
       "name": "AI Agent DM",
       "retryOnFail": true
     },
@@ -961,7 +961,7 @@
         4624,
         2752
       ],
-      "id": "952f5985-7940-4c38-b4a1-12190a47ca0c",
+      "id": "32cab0be-6945-445c-b335-46f7a0bcdcac",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
@@ -982,7 +982,7 @@
         4768,
         2752
       ],
-      "id": "07de9359-ef67-4787-bec4-5c0b36e015fb",
+      "id": "a5e774a9-c3c0-4341-b80a-c4ead65ee60d",
       "name": "Memory DM"
     },
     {
@@ -996,7 +996,7 @@
         4928,
         2736
       ],
-      "id": "44dda3a7-76cb-45b4-ab43-77edd862fc6d",
+      "id": "cc536b99-b261-4a7c-a2f6-ad571193ffb9",
       "name": "Google Docs Knowledge",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1015,7 +1015,7 @@
         5104,
         2448
       ],
-      "id": "093e0bd7-0c84-405b-97be-dfe0599c9cd1",
+      "id": "37c4de6b-95fd-46b0-a973-8215ae9aa67b",
       "name": "Parse Reply"
     },
     {
@@ -1028,7 +1028,7 @@
         5312,
         2448
       ],
-      "id": "eb4db393-2342-4080-aa56-4c935cc9519c",
+      "id": "257f6a3a-cae7-46c5-b615-3dce3b1fee0a",
       "name": "Build Chat Block"
     },
     {
@@ -1055,7 +1055,7 @@
         5552,
         2448
       ],
-      "id": "d8d07553-e2f8-4e08-8988-6bfe89468bf0",
+      "id": "cf921928-4547-4e6d-b912-5c814de63d4f",
       "name": "Send DM Reply"
     },
     {
@@ -1104,7 +1104,7 @@
         },
         "options": {}
       },
-      "id": "1452b5ec-1589-43c4-9860-03ec33fc10f3",
+      "id": "b7781619-f046-491b-b194-3fcc713e90f3",
       "name": "Append DM Chat History",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1198,7 +1198,7 @@
         },
         "options": {}
       },
-      "id": "18e55a57-0b8c-47dc-9eb1-445998c5e543",
+      "id": "3eecaece-cfa4-45ba-a99f-3502185d24b7",
       "name": "Upsert DM Contact",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -1268,7 +1268,7 @@
         },
         "options": {}
       },
-      "id": "0814a5c9-43b6-49a7-8671-132d6ad433e2",
+      "id": "705afd38-21e4-43ec-85d8-c7b547da49d9",
       "name": "Log Execution DM",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
