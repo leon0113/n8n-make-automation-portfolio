@@ -20,6 +20,12 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [AI UGC Product Ad Generator (Nano Banana + Veo 3.1)](n8n/ai-ugc-image-to-video-nanobanana-veo/) | Turns a product photo into a UGC-style lifestyle image and a short AI video ad | OpenAI, Vertex AI (Nano Banana, Veo 3.1), Google Sheets, Google Drive |
 | [WhatsApp Client Task Intake to ClickUp & Slack](n8n/whatsapp-task-intake-clickup/) | AI agent turns client WhatsApp messages (text, voice, images, docs) into assigned ClickUp tasks | WhatsApp Cloud API, OpenAI, ClickUp, Slack, Google Sheets |
 
+## Make.com Workflows
+
+| Workflow | What it does | Tools |
+| --- | --- | --- |
+| [HouseCall Pro to GoHighLevel Sync](make/housecall-pro-to-gohighlevel-sync/) | Syncs 11 HouseCall Pro lifecycle events into GoHighLevel contacts and pipeline opportunities | HouseCall Pro, GoHighLevel |
+
 ## Data Privacy
 
 All personal, client, and employer data has been removed and replaced with placeholders. Company names, phone numbers, and email addresses that appear in these workflows are fictional and do not refer to real businesses or people.
