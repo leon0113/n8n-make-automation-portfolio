@@ -1,0 +1,1127 @@
+{
+  "name": "HeyGen AI Avatar Video Auto-Publisher with Slack Approval",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -4176,
+        400
+      ],
+      "id": "60c7f724-1998-431a-abf4-6e7466ccb4ca",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a high-energy tech startup ad copywriter for Northwind Digital Solutions Inc. Using the title below and instruction, create a powerful 10-15 second ad script designed for social media video.\nTitle: {{ $json.Title }}\n\nInstruction: {{ $json['Prompt Instruction'] }}\n\nRules:\n- Speak directly to the viewer using \"you.\"\n- Max 4000 characters\n- Open with a bold hook that instantly grabs attention in the first 5 seconds.\n- Use energetic, persuasive, and emotional language.\n- Include at least one benefit-driven statement about what Northwind Digital Solutions Inc. does for businesses.\n- This video will be educational — educate your audience about AI automation, AI voice agents, automated lead follow-up, AI receptionist systems, and business workflow automation. Share real tips and insights that help business owners understand how AI can save them time, reduce costs, and grow their revenue before they make any decisions.\n- End with a clear, urgent call-to-action that makes them want to contact Northwind Digital Solutions Inc. right now.\n- Do NOT include scene descriptions, labels, or stage directions — only the final spoken script in plain text.\n- Do not use any \\n. No line breaks anywhere in the response.\n- Company contact or CTA should reference: Northwind Digital Solutions Inc. — book a free demo or consultation.\n- Keep the tone smart, modern, confident, and tech-forward — not salesy or robotic.\nNote: the full response you provide will be directly used in video generation. Do not add anything extra. No formatting, no labels, no markdown. Plain spoken words only.",
+              "role": "assistant"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -3952,
+        400
+      ],
+      "id": "88bc9db9-6c7a-45c9-8e21-d2ee34e4d179",
+      "name": "Script Writer",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"api\": \"{{BLOTATO_API_KEY}}\",\n  \"instagram_id\": \"{{INSTAGRAM_ID}}\",\n  \"youtube_id\": \"{{YOUTUBE_ID}}\",\n  \"tiktok_id\": \"{{TIKTOK_ID}}\",\n  \"facebook_id\": \"{{FACEBOOK_ID}}\",\n  \"facebook_page_id\": \"{{FACEBOOK_PAGE_ID}}\",\n  \"threads_id\": \"\",\n  \"twitter_id\": \"\",\n  \"linkedin_id\": \"{{LINKEDIN_ID}}\",\n  \"linkedin_page_id:\": \"3315928\",\n  \"pinterest_id\": \"\",\n  \"pinterest_board_id\": \"\",\n  \"bluesky_id\": \"\"\n}",
+        "options": {}
+      },
+      "id": "11d82d55-b7b3-4194-a478-bc27f8cbbf25",
+      "name": "Assign Social Media IDs",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -112,
+        160
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/media",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "{{BLOTATO_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('HTTP Request').item.json.data.video_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc356d28-1693-443d-84ca-f2d374408145",
+      "name": "Upload Video to Blotato",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -336,
+        160
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Assign Social Media IDs').item.json.api }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.instagram_id }}\",\n    \"target\": {\n      \"targetType\": \"instagram\"\n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Parse Caption JSON').item.json.caption) }},\n      \"platform\": \"instagram\",\n      \"mediaUrls\": [\n        \"{{ $('Upload Video to Blotato').item.json.url }}\"\n      ]\n    }\n  }\n}\n\n",
+        "options": {}
+      },
+      "id": "5cfefb50-4ec0-4f6f-a954-58f5c2e19c97",
+      "name": "INSTAGRAM",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        112,
+        -112
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Assign Social Media IDs').item.json.api }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $json.facebook_id }}\",\n    \"target\": {\n      \"targetType\": \"facebook\",\n      \"pageId\": \"{{ $json.facebook_page_id }}\"\n\n      \n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Parse Caption JSON').item.json.caption) }},\n      \"platform\": \"facebook\",\n      \"mediaUrls\": [\n        \"{{ $('Upload Video to Blotato').item.json.url }}\"\n      ]\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "9b338878-65ad-453c-a405-9eb3b4c755d1",
+      "name": "FACEBOOK",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        112,
+        464
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.heygen.com/v1/video_status.get",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "video_id",
+              "value": "={{ $('Generate Video').item.json.data.video_id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2256,
+        304
+      ],
+      "id": "4617abc3-8eb2-4010-bf9d-28f75a3f7648",
+      "name": "Get Video1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        304
+      ],
+      "id": "47183cd4-02ef-46b3-8595-b2cf213cb4de",
+      "name": "30 Seconds",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f90adfdd-5635-4e8c-ac8d-02927420df57",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2032,
+        224
+      ],
+      "id": "360f02fe-354b-4389-b593-c7c51057a1b2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1808,
+        400
+      ],
+      "id": "015102d3-56e3-4f9a-991f-30c47cd1b01b",
+      "name": "Wait",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=data",
+        "name": "={{ $('Generate Video').item.json.data.video_id }}.mp4",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Video",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1584,
+        160
+      ],
+      "id": "5443c206-edac-40ac-8c41-a55d348adba3",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.video_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1808,
+        160
+      ],
+      "id": "02d1d1fd-7e28-4ee6-911f-12aab42dfc85",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Create & Get Video w/ Polling\n",
+        "height": 576,
+        "width": 1152,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2704,
+        -16
+      ],
+      "id": "8d48b347-eb9c-4209-ad6c-98b957b4b6cd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -560,
+        160
+      ],
+      "id": "d856b85f-7173-486a-90d2-a2c9aebdef85",
+      "name": "Download mp4 file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "=query",
+        "queryString": "mimeType='video/mp4' and trashed=false",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -784,
+        160
+      ],
+      "id": "270e177d-0b9c-4d5f-a4a4-2fc574197cd4",
+      "name": "List latest MP",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.heygen.com/v2/video/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "{{HEYGEN_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\": \"{{ $('Limit').item.json.avatar_id }}\",\n        \"avatar_style\": \"normal\"\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": \"{{ $('Script Writer').item.json.message.content }}\",\n        \"voice_id\": \"{{ $('Limit').item.json.voice_id }}\"\n      }\n    }\n  ],\n  \"dimension\": {\n    \"width\": 1280,\n    \"height\": 720\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2704,
+        304
+      ],
+      "id": "6b6b9f35-96b7-4447-9212-c76d4ca0d014",
+      "name": "Generate Video"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a YouTube SEO metadata generator for the Northwind Digital Solutions Inc. social media channel.\nBased on the following SCRIPT text:\n{{ $('Script Writer').item.json.message.content }}\nFollow these STRICT RULES:\nOutput only JSON with fields exactly: title_final, caption, hashtags.\nDo NOT add extra text, comments, or code blocks.\ntitle_final: ≤ 80 chars, must include at least one exact phrase from the first sentence of the SCRIPT.\ncaption: ≤ 300 chars (before fixed text), start with a hook that reuses phrasing from the SCRIPT (no hashtags).\nAfter this generated caption, always append the following fixed block in the same line, separated with \" | \" instead of new lines:\nWant to automate your business? Subscribe: https://www.youtube.com/@northwinddigital?sub_confirmation=1 | Follow on Facebook: https://www.facebook.com/northwinddigital | Follow on Instagram: https://www.instagram.com/northwinddigital/ | Disclaimer: General info only, not financial or legal advice.\nhashtags: 3–5 items, all lower case, no spaces, all must be terms already present in SCRIPT (or their exact tokenized form with #).\nAlways include #NorthwindnNetworks and #AIAutomation in hashtags.\nHashtags should appear inside the caption at the end, before the fixed block.",
+              "role": "system"
+            },
+            {
+              "content": "Title: Home Buying Tips\\nWrite JSON with keys: title_final (<=80 chars), caption (<=300 chars), hashtags (6-10 items).\\n\\nExample JSON:\\n{\\n  \"title_final\": \"5 Tips for Buying a Home in your area\",\\n  \"caption\": \"Thinking of buying your first home in your area? Here are 5 tips to help you get started! #realestate #firsttimehomebuyer #realestatetips\",\\n  \"hashtags\": [\"#realestate\", \"#firsttimehomebuyer\", \"#realestatetips\", \"#homeowners\", \"#realestate\"]\\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1360,
+        160
+      ],
+      "id": "ba130086-0b86-4234-babe-3eeafc9d0ee0",
+      "name": "Caption AI",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse JSON block from model output → { title_final, caption, hashtags }\nconst raw = $json.message?.content ?? $json.content ?? '';\nconst m = raw.match(/```(?:json)?\\s*([\\s\\S]*?)\\s*```/i);\nconst body = m ? m[1] : raw;\nlet obj;\ntry { obj = JSON.parse(body); } catch { obj = { title_final: raw.slice(0,80), caption: raw.slice(0,300), hashtags: [] }; }\nconst title_final = String(obj.title_final || '').trim();\nconst caption = String(obj.caption || '').trim();\nlet hashtags = Array.isArray(obj.hashtags) ? obj.hashtags : [];\nhashtags = hashtags.map(h => h.trim()).filter(Boolean);\nreturn [{ json: { title_final, caption } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        160
+      ],
+      "id": "9cb57297-b8d9-4736-8bcf-740dd3e96a6a",
+      "name": "Parse Caption JSON",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Assign Social Media IDs').item.json.api }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.tiktok_id }}\",\n    \"target\": {\n      \"targetType\": \"tiktok\",\n      \"isYourBrand\": \"false\", \n      \"disabledDuet\": \"false\",\n      \"privacyLevel\": \"PUBLIC_TO_EVERYONE\",\n      \"isAiGenerated\": \"true\",\n      \"disabledStitch\": \"false\",\n      \"disabledComments\": \"false\",\n      \"isBrandedContent\": \"false\"\n      \n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Parse Caption JSON').item.json.caption) }},\n      \"platform\": \"tiktok\",\n      \"mediaUrls\": [\n        \"{{ $('Upload Video to Blotato').item.json.url }}\"\n      ]\n    }\n  }\n}\n",
+        "options": {}
+      },
+      "id": "e7bf7667-c723-4a1a-bbf7-9bea8c36690b",
+      "name": "TIKTOK1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        112,
+        272
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Post Social Media",
+        "height": 864,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "e50ef5c1-024e-4451-a651-9c5f7438c240",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $('Assign Social Media IDs').item.json.api }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post\": {\n    \"accountId\": \"{{ $('Assign Social Media IDs').item.json.youtube_id }}\",\n    \"target\": {\n      \"targetType\": \"youtube\",\n      \"title\": \"{{ $('Parse Caption JSON').item.json.title_final }}\",\n      \"privacyStatus\": \"public\",\n      \"shouldNotifySubscribers\": false\n    },\n    \"content\": {\n      \"text\": {{ JSON.stringify($('Parse Caption JSON').item.json.caption) }},\n      \"platform\": \"youtube\",\n      \"mediaUrls\": [\n        \"{{ $('Upload Video to Blotato').item.json.url }}\"\n      ]\n    }\n  }\n}\n",
+        "options": {}
+      },
+      "id": "c37dd9dd-5387-4300-89d2-6f5c844c64f4",
+      "name": "YOUTUBE",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        112,
+        80
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a4cd98e2-577f-43ab-b3eb-4075f07b7d6b",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -4624,
+        400
+      ],
+      "id": "0071aeea-770f-4520-ab42-3545636bceb7",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Get_Ideas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4848,
+        400
+      ],
+      "id": "8d8bfab1-2290-4b9b-9993-87f49867d472",
+      "name": "Get all data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Get_Ideas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "success",
+            "Title": "={{ $('Filter').item.json.Title }}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3600,
+        400
+      ],
+      "id": "d5dacbaa-5da4-4375-be80-39714338f29d",
+      "name": "Update status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5072,
+        400
+      ],
+      "id": "ea6a989b-5e8b-48ec-bf4b-22e56793f26a",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "jsCode": "const day = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat\n\nconst avatars = [\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_1}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Sunday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_2}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Monday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_1}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Tuesday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_2}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Wednesday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_1}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Thursday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_2}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Friday\n  { avatar_id: \"{{HEYGEN_AVATAR_ID_1}}\", voice_id: \"{{HEYGEN_VOICE_ID_1}}\" }, // Saturday\n];\n\nconst selected = avatars[day];\n\nreturn $input.all().map(item => ({\n  json: {\n    ...item.json,\n    avatar_id: selected.avatar_id,\n    voice_id: selected.voice_id,\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4400,
+        400
+      ],
+      "id": "1620cb4d-f90c-4fa6-952c-658dbba025d3",
+      "name": "Set Avatar Voice"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "USLACKBOT",
+          "mode": "list",
+          "cachedResultName": "slackbot"
+        },
+        "text": "=📝 *Script Approval Needed*\n\n*Title:* {{ $('Filter').item.json.Title }}\n\n*Avatar:* {{ $('Limit').item.json.avatar_id }}\n\n---\n\n*Generated Script:*\n{{ $('Script Writer').item.json.message.content }}\n\n---\n\n👉 *Approve here:* {{ $execution.resumeFormUrl }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        -3376,
+        400
+      ],
+      "id": "f6abd1d3-2612-4926-8256-7cb314b29358",
+      "name": "Send Script to Slack",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "form",
+        "formTitle": "Approval Response",
+        "formDescription": "Type \"all good\" to approve or \"reject\" to skip",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Approve this script",
+              "fieldType": "checkbox",
+              "defaultValue": "all good",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "all good"
+                  },
+                  {
+                    "option": "reject"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3152,
+        400
+      ],
+      "id": "c8cac10a-fdad-4a45-89e6-ac13840df41c",
+      "name": "Wait For Approval",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "approval-check-001",
+              "leftValue": "={{ $json['Approve this script'][0] }}",
+              "rightValue": "all good",
+              "operator": {
+                "type": "string",
+                "operation": "contains",
+                "name": "filter.operator.contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2928,
+        400
+      ],
+      "id": "2abd67bc-c824-4d91-875f-cadd82961983",
+      "name": "Check Approval"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "{{SLACK_USER_ID}}",
+          "mode": "list",
+          "cachedResultName": "n8nchat"
+        },
+        "text": "=❌ Script for *{{ $('Filter').item.json.Title }}* was rejected. Skipping video generation.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        -2704,
+        496
+      ],
+      "id": "cb7d826c-a342-4c71-8ad8-304a469ea7c4",
+      "name": "Notify Rejection",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Script Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Script Writer": {
+      "main": [
+        [
+          {
+            "node": "Update status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign Social Media IDs": {
+      "main": [
+        [
+          {
+            "node": "INSTAGRAM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TIKTOK1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FACEBOOK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "YOUTUBE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to Blotato": {
+      "main": [
+        [
+          {
+            "node": "Assign Social Media IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "30 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Caption AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download mp4 file": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to Blotato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List latest MP": {
+      "main": [
+        [
+          {
+            "node": "Download mp4 file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caption AI": {
+      "main": [
+        [
+          {
+            "node": "Parse Caption JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Caption JSON": {
+      "main": [
+        [
+          {
+            "node": "List latest MP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Set Avatar Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all data": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update status": {
+      "main": [
+        [
+          {
+            "node": "Send Script to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Get all data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Avatar Voice": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Script to Slack": {
+      "main": [
+        [
+          {
+            "node": "Wait For Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait For Approval": {
+      "main": [
+        [
+          {
+            "node": "Check Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Approval": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

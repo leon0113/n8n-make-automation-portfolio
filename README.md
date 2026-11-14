@@ -12,6 +12,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [AI Carousel Content Generator & Auto-Publisher](n8n/ai-carousel-content-autopublish/) | Writes a carousel with GPT, generates an AI image per slide and publishes it to Instagram, LinkedIn and Facebook | OpenAI, Vertex AI (Gemini), Google Sheets, Google Drive, Blotato |
 | [AI SEO Blog Writer & Auto-Publisher](n8n/ai-seo-blog-autopublish/) | Writes weekly SEO articles from a keyword queue, adds meta and images, and saves them as drafts for review | OpenAI, Pexels, REST API, Slack |
 | [AI Website Audit & Lead Outreach Report](n8n/ai-website-audit-lead-report/) | Audits lead websites with AI, builds an HTML/PDF report and writes a personalized email sequence | OpenAI, Google Sheets, Google Drive, Jina Reader, PDFShift |
+| [HeyGen AI Avatar Video Auto-Publisher](n8n/heygen-avatar-video-autopublish-with-approval/) | Writes a script, gets Slack approval, renders a HeyGen avatar video and posts it to 4 platforms | OpenAI, HeyGen, Slack, Google Sheets, Google Drive, Blotato |
 
 ## Data Privacy
 
