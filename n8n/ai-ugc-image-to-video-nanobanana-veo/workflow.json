@@ -1,0 +1,1295 @@
+{
+  "name": "AI UGC Product Ad Generator (Nano Banana + Veo 3.1)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        528
+      ],
+      "id": "a3370f69-07e7-48a4-bdeb-3fce6e62aa02",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "batchSize": 2,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -48,
+        528
+      ],
+      "id": "b8c06b30-fc91-4d00-bc2b-9c5c2d717842",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.productImgUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        592,
+        2704
+      ],
+      "id": "1971902d-793f-4371-a228-f6470e52c2e4",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -784,
+        528
+      ],
+      "id": "296cde85-c279-4741-8aff-85734216637b",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "information"
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        432,
+        208
+      ],
+      "id": "41f8e46f-0b32-4b85-aed5-f9f91dcdf5f0",
+      "name": "Get resolution1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.productImgUrl.split('id=')[1] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        224,
+        544
+      ],
+      "id": "bf7d1789-7a2f-4e2d-ae86-87960ae196e3",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfor(const item of items){\n  const origwidth = item.json.size.width;\n  const origheight = item.json.size.height;\n\n  const bgHeight = origheight;\n  const bgWidth = Math.round((16/9)*bgHeight);\n\n  const positionX = Math.round((bgWidth - origwidth) / 2);\n  const positionY = 0;\n\n  results.push({\n    json: {\n      backgroundWidth: bgWidth,\n      backgroundHeight: bgHeight,\n      positionX,\n      positionY\n    }\n  })\n}\n\nreturn results"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        208
+      ],
+      "id": "92a5306b-ca92-480f-a1d9-7e31c8b108dc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "dataPropertyName": "image",
+        "width": "={{ $json.backgroundWidth }}",
+        "height": "={{ $json.backgroundHeight }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        848,
+        208
+      ],
+      "id": "35507af5-01ff-4775-a10e-0bca9b437cce",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1040,
+        528
+      ],
+      "id": "40201bcf-90c1-4291-a5dd-794220a22997",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "composite",
+        "dataPropertyName": "image",
+        "dataPropertyNameComposite": "data",
+        "positionX": "={{ $json.positionX }}",
+        "positionY": "={{ $json.positionY }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        528
+      ],
+      "id": "4e432515-dc34-45a7-862c-5b55a85847e3",
+      "name": "Edit Image1"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "image",
+        "destinationKey": "editedImage",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1456,
+        528
+      ],
+      "id": "cff22e4b-86a7-4fba-91be-463b249f4579",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "You are a professional commercial lifestyle photographer and creative director specializing in UGC-style product photography for premium brands.\n\nCRITICAL ROLE DEFINITION:\nYou do NOT generate images.\nYou ONLY analyze the provided product image and OUTPUT a single, complete, ready-to-use IMAGE GENERATION PROMPT for an external image model (Nano Banana / OpenAI).\n\n––––––––––––––––––––––––––\nYOUR TASK\n––––––––––––––––––––––––––\n1. Analyze the provided product image carefully.\n2. Identify:\n   - Product type\n   - Material(s)\n   - Color(s)\n   - Approximate size\n   - Intended real-world use\n3. Based on this analysis, generate ONE detailed IMAGE GENERATION PROMPT that instructs an image model to create a realistic UGC-style lifestyle photograph.\n\nYou must NOT describe your analysis.\nYou must ONLY output the final IMAGE GENERATION PROMPT.\n\n––––––––––––––––––––––––––\nOUTPUT FORMAT (STRICT)\n––––––––––––––––––––––––––\nYour entire output MUST follow this structure exactly:\n\nIMAGE PROMPT:\n\n[Product Description]\n\n[Human Model & Interaction]\n\n[Environment & Scene]\n\n[Lighting]\n\n[Camera & Photography Details]\n\n[Visual Style & Color Grading]\n\n[Negative Constraints]\n\n––––––––––––––––––––––––––\nPROMPT CONTENT REQUIREMENTS\n––––––––––––––––––––––––––\n\nPRODUCT DESCRIPTION:\n- Accurately describe the product based ONLY on the input image\n- Preserve exact shape, proportions, branding, materials, and colors\n- No exaggeration, no redesign\n\nHUMAN MODEL & INTERACTION:\n- One realistic human model\n- Natural age range and appearance\n- Not posed, not glamorous, not influencer-style\n- Subtle, believable interaction with the product\n- The product must remain the visual focal point\n\nENVIRONMENT & SCENE:\n- Real-world, everyday setting appropriate for the product\n- Lived-in, relatable, modern environment\n- Include time of day\n- Scene should feel candid and unstaged\n- The product must feel naturally present in the moment\n\nLIGHTING:\n- Natural light only (window light, daylight, golden hour)\n- Soft shadows\n- Realistic highlights\n- Balanced exposure\n- No studio lighting\n\nCAMERA & PHOTOGRAPHY DETAILS:\n- Shot on iPhone 15 Pro or Sony A7 IV\n- 35mm or 50mm focal length look\n- Shallow depth of field\n- Product in sharp focus\n- Background slightly blurred\n- Natural perspective and framing\n\nVISUAL STYLE & COLOR GRADING:\n- Authentic UGC-style lifestyle photography\n- Slight imperfections allowed (natural texture, subtle grain)\n- Realistic skin tones\n- Warm, natural color palette\n- Social-media and e-commerce friendly\n- No artificial polish\n\nNEGATIVE CONSTRAINTS (MANDATORY):\n- No CGI\n- No studio setup\n- No artificial glow\n- No dramatic or fake lighting\n- No added text, logos, or watermarks\n- No product distortion\n- No unrealistic reflections\n- No plastic-looking skin\n- No over-sharpening\n\n––––––––––––––––––––––––––\nFINAL RULES\n––––––––––––––––––––––––––\n- Output ONLY the IMAGE PROMPT\n- Do NOT include explanations, analysis, or headings outside the defined format\n- Do NOT include markdown formatting\n- The output must be directly usable in Nano Banana or OpenAI image generation\n",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1664,
+        528
+      ],
+      "id": "b87c14ca-03b2-45eb-85bb-926bfdf4c77a",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        2704
+      ],
+      "id": "8e842eec-b73c-4025-b584-6784120ac0e0",
+      "name": "Set Image URL & Context",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        1152,
+        2704
+      ],
+      "id": "693c91cc-8a40-43b2-80be-e1f95120ac31",
+      "name": "GPT-4o Vision (Analyze)",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        1376,
+        2704
+      ],
+      "id": "fbc55809-d7ce-431a-9b60-86237a0a97c7",
+      "name": "DALL-E 3 (Generate UGC)",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productImgUrl": "={{ $('Get row(s) in sheet1').item.json.productImgUrl }}",
+            "nanobananaPrompt": "={{ $json['0'].content[0].text }}"
+          },
+          "matchingColumns": [
+            "productImgUrl"
+          ],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "productImgUrl",
+              "displayName": "productImgUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "productOffer",
+              "displayName": "productOffer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nanobananaPrompt",
+              "displayName": "nanobananaPrompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veo31Prompt",
+              "displayName": "veo31Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "finalVideoUrl",
+              "displayName": "finalVideoUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1872,
+        528
+      ],
+      "id": "4b1e05cd-bfc4-4fc1-a4a7-c1b8ea24e100",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        592,
+        2944
+      ],
+      "id": "1d044146-d935-49cb-bdcf-17fb775c36ce",
+      "name": "HTTP Request",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}\n/locations/us-central1/publishers/google/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"contents\": [\n        {\n            \"role\": \"user\",\n            \"parts\": [\n                {\n                    \"text\": \"{{ $json.nanobananaPrompt }}\"\n                },\n                {\n                  \"inlineData\": {\n                    \"mimeType\": \"image/jpeg\",\n                    \"data\": \"{{ $('Extract from File').item.json.editedImage }}\"\n                  }\n                }\n            ]\n        }\n    ]\n    , \"generationConfig\": {\n        \"temperature\": 0.7\n        ,\"maxOutputTokens\": 32768\n        ,\"responseModalities\": [\"IMAGE\"]\n        ,\"topP\": 0.95\n    },\n    \"safetySettings\": [\n        {\n            \"category\": \"HARM_CATEGORY_HATE_SPEECH\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_DANGEROUS_CONTENT\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\n            \"threshold\": \"OFF\"\n        },\n        {\n            \"category\": \"HARM_CATEGORY_HARASSMENT\",\n            \"threshold\": \"OFF\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        528
+      ],
+      "id": "840f4d43-ccd0-49a3-8480-60b652f708df",
+      "name": "Create NanoBanana image",
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "candidates[0].content.parts[0].inlineData.data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        528
+      ],
+      "id": "c627228d-dddc-4a75-b61e-fc6c8fc59f81",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over all input items\nfor (const item of $input.all()) {\n  if (item.json.nanobananaPrompt) {\n    // Regex explanation:\n    // [\\r\\n]+  -> Finds one or more newline characters (handles Windows & Linux style)\n    // ' '      -> Replaces them with a single space\n    item.json.nanobananaPrompt = item.json.nanobananaPrompt.replace(/[\\r\\n]+/g, ' ').trim();\n  }\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        528
+      ],
+      "id": "0c1fef9b-ec30-4015-9760-d93383807282",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4acadc08-2a99-434c-8e97-491d9352e513",
+              "leftValue": "={{ $json.nanobananaPrompt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -368,
+        528
+      ],
+      "id": "655f7758-d659-4cc2-8261-6ea1829a989e",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-generate-preview:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"endpoint\": \"projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-generate-preview\",\n    \"instances\": [\n        {\n            \"prompt\": {{ JSON.stringify($('Update row in sheet1').item.json.veo31Prompt) }},\n            \"referenceImages\": [\n                {\n                    \"image\": {\n                        \"bytesBase64Encoded\": \"{{ $('Create NanoBanana image').item.json.candidates[0].content.parts[0].inlineData.data }}\",\n                        \"mimeType\": \"image/png\"\n                    },\n                    \"referenceType\": \"asset\"\n                }\n            ]\n        }\n    ],\n    \"parameters\": {\n        \"aspectRatio\": \"16:9\",\n        \"sampleCount\": 1,\n        \"durationSeconds\": \"10\",\n        \"personGeneration\": \"allow_all\",\n        \"addWatermark\": true,\n        \"includeRaiReason\": true,\n        \"generateAudio\": true,\n        \"resolution\": \"720p\",\n        \"seed\": {{ Math.floor(Math.random() * 1000000) }},\n        \"negativePrompt\": \"low quality, blurry, watermark, text, signature, cartoon, disfigured, bad anatomy, mumbling, gibberish, unintelligible speech, background noise, additional dialogue\",\n        \"guidanceScale\": 10\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3664,
+        528
+      ],
+      "id": "c2383af5-8d25-46f9-a4e3-5a1ddd49e20f",
+      "name": "Start Veo3.1 Generation",
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://us-central1-aiplatform.googleapis.com/v1/projects/{{GCP_PROJECT_ID}}/locations/us-central1/publishers/google/models/veo-3.1-generate-preview:fetchPredictOperation",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"operationName\": \"{{ $json.name }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3920,
+        528
+      ],
+      "id": "627d40b5-03a8-4b50-9511-c8c1267260f8",
+      "name": "Get Veo3.1 video",
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=You are a prompt generator for an image-to-video AI model.\n\nYou will receive:\n\n1. An image of a young woman wearing or holding a product in a casual home or outdoor setting.\n2. Product Name: \"{{ $('Merge').item.json.productName }}\".\n3. Offer / Price: \"{{ $('Merge').item.json.productOffer }}\".\n\nCRITICAL ROLE:\nYou do NOT generate the video.\nYou ONLY generate a SINGLE, COMPLETE, READY-TO-USE VIDEO GENERATION PROMPT.\n\n––––––––––––––––––––––––––\nYOUR TASK\n––––––––––––––––––––––––––\nGenerate a detailed 10-second UGC-style video prompt that transforms the static image into a realistic, authentic social media ad.\n\nThe video must feel like it was recorded on a smartphone by a real person, not produced by a studio.\n\n––––––––––––––––––––––––––\nOUTPUT FORMAT (STRICT)\n––––––––––––––––––––––––––\nOutput ONLY the following structure and nothing else:\n\nVIDEO PROMPT:\n\n[Opening Shot & Motion]\n\n[Facial Expression & Body Language]\n\n[Spoken Dialogue (Natural UGC Tone)]\n\n[Scene & Environment Continuity]\n\n[Camera & Motion Details]\n\n[Lighting & Visual Realism]\n\n[Product Focus & CTA Integration]\n\n[Negative Constraints]\n\n––––––––––––––––––––––––––\nPROMPT CONTENT REQUIREMENTS\n––––––––––––––––––––––––––\n\nOPENING SHOT & MOTION:\n- Start from the provided image as the first frame\n- Subtle natural motion (head movement, hand movement, blinking)\n- Smooth transition from still image to video\n- No jump cuts\n\nFACIAL EXPRESSION & BODY LANGUAGE:\n- Friendly, confident, relatable expression\n- Natural blinking and micro-expressions\n- Casual posture\n- Authentic, conversational energy\n\nSPOKEN DIALOGUE (MANDATORY):\n- Woman speaks directly to the camera\n- Natural, casual UGC tone (not scripted, not salesy)\n- First-person language\n- Must clearly mention:\n  - Product Name: \"{{ $('Merge').item.json.productName }}\"\n  - Offer / Price: \"{{ $('Merge').item.json.productOffer }}\"\n\nExample tone:\n“Hey guys, I’ve been using this [product Name ] lately and honestly it’s been amazing… and right now it’s only [ product Offer ].”\n\nSCENE & ENVIRONMENT CONTINUITY:\n- Same environment as the original image\n- Home, balcony, street, café, park, or similar casual setting\n- Lived-in, real, unstaged feel\n- Background remains consistent with slight natural movement\n\nCAMERA & MOTION DETAILS:\n- Vertical 9:16 format\n- Smartphone front camera feel\n- Slight handheld movement\n- Natural framing (mid-shot or chest-up)\n- No cinematic camera moves\n\nLIGHTING & VISUAL REALISM:\n- Natural daylight or soft indoor lighting\n- Realistic shadows and highlights\n- Balanced exposure\n- No studio lighting\n\nPRODUCT FOCUS & CTA INTEGRATION:\n- Product remains clearly visible throughout the video\n- Natural hand gesture pointing to or holding the product\n- Soft verbal CTA at the end (no text overlays)\n- Feels like a recommendation, not an advertisement\n\nNEGATIVE CONSTRAINTS (MANDATORY):\n- No CGI\n- No artificial motion\n- No over-smoothed skin\n- No exaggerated facial expressions\n- No captions, subtitles, or text overlays\n- No added logos or graphics\n- No scene changes\n- No voice-over\n- No background music\n\n––––––––––––––––––––––––––\nFINAL RULES\n––––––––––––––––––––––––––\n- Output ONLY the VIDEO PROMPT\n- Do NOT include explanations or analysis\n- Do NOT include markdown formatting\n- The output must be directly usable in an image-to-video AI model\n",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        2928,
+        528
+      ],
+      "id": "d2250794-5e7d-4377-8901-ecde7bbc8328",
+      "name": "Create Veo3.1 prompt",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\n// Loop over all input items\nfor (const item of $input.all()) {\n  \n  // 1. Get the data. If 'json' is an array (which causes the error), take the first item.\n  let data = Array.isArray(item.json) ? item.json[0] : item.json;\n\n  // 2. Extract and Clean the text\n  let cleanText = \"\";\n  \n  // Check if the Anthropic/Claude structure exists\n  if (data.content && data.content[0] && data.content[0].text) {\n    const rawText = data.content[0].text;\n    cleanText = rawText.replace(/[\\r\\n]+/g, ' ').trim();\n  } \n  // Fallback: If the text is just in a 'text' property\n  else if (data.text) {\n    cleanText = data.text.replace(/[\\r\\n]+/g, ' ').trim();\n  }\n\n  // 3. Add the clean prompt to the data object\n  data.videoPrompt = cleanText;\n\n  // 4. Push to results in the strictly correct n8n format\n  results.push({\n    json: data,\n    binary: item.binary // Keep any binary files (images) attached\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3184,
+        528
+      ],
+      "id": "f7fa4f7e-225c-4de0-890b-9d26488e2813",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productImgUrl": "={{ $('Get row(s) in sheet1').item.json.productImgUrl }}",
+            "row_number": 0,
+            "veo31Prompt": "={{ $json.videoPrompt }}"
+          },
+          "matchingColumns": [
+            "productImgUrl"
+          ],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "productImgUrl",
+              "displayName": "productImgUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "productOffer",
+              "displayName": "productOffer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nanobananaPrompt",
+              "displayName": "nanobananaPrompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "veo31Prompt",
+              "displayName": "veo31Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "finalVideoUrl",
+              "displayName": "finalVideoUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3424,
+        528
+      ],
+      "id": "63499f29-8645-4d20-9fb3-04d80b3b498a",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1eabf18a-d6d4-4ff8-8c02-a6f7a634dbcf",
+              "leftValue": "={{ $json.done}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4128,
+        528
+      ],
+      "id": "be044d6f-e513-4861-a29d-ca71c6a2350b",
+      "name": "Video Ready?"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4336,
+        624
+      ],
+      "id": "9a83bc8a-d484-4c8d-a9da-26a0631cffda",
+      "name": "Wait",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "binaryPropertyName": "video",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4944,
+        784
+      ],
+      "id": "2220ac5a-6296-4102-bf17-4230f60c5e15",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "video",
+        "name": "videoAd.mp4",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_VIDEO_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Video",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_VIDEO_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5152,
+        784
+      ],
+      "id": "a0ce187e-9984-4661-bddd-842ff67e2cf2",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "finalVideoUrl": "={{ $json.webContentLink }}",
+            "productImgUrl": "={{ $('Update row in sheet1').item.json.productImgUrl }}"
+          },
+          "matchingColumns": [
+            "productImgUrl"
+          ],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "productImgUrl",
+              "displayName": "productImgUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "productOffer",
+              "displayName": "productOffer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nanobananaPrompt",
+              "displayName": "nanobananaPrompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "veo31Prompt",
+              "displayName": "veo31Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "finalVideoUrl",
+              "displayName": "finalVideoUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5360,
+        784
+      ],
+      "id": "87a5e9b6-a9c5-4ff5-9724-18feb7e5c932",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "productPhoto",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "{{DRIVE_IMAGE_FOLDER_ID}}",
+          "mode": "list",
+          "cachedResultName": "AI generated Image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/{{DRIVE_IMAGE_FOLDER_ID}}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2752,
+        528
+      ],
+      "id": "6c2f6b2a-f00b-450d-ab8f-911d47d59884",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Get resolution1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get resolution1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create NanoBanana image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create NanoBanana image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Veo3.1 Generation": {
+      "main": [
+        [
+          {
+            "node": "Get Veo3.1 video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Veo3.1 prompt": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Start Veo3.1 Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Veo3.1 video": {
+      "main": [
+        [
+          {
+            "node": "Video Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Ready?": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Veo3.1 video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Create Veo3.1 prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
