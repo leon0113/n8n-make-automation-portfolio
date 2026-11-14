@@ -1,0 +1,2673 @@
+{
+  "name": "WhatsApp Client Task Intake to ClickUp & Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $('WhatsApp Trigger').item.json.metadata.phone_number_id }}",
+        "recipientPhoneNumber": "={{$json.recipientPhoneNumber}}",
+        "textBody": "={{$json.reply_message}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -3088,
+        13712
+      ],
+      "id": "ef4d74e7-00b4-45df-9297-c028c914dbcb",
+      "name": "Send WhatsApp Reply",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const clickupUrl = $('Create ClickUp Task').first().json.url|| 'Task created successfully';\nconst taskTitle = $('Build Task Payload').first().json.ai_result?.title || $('Build Task Payload').first().json.clickup_task_name || '';\n\nreturn [{\n  json: {\n    reply_message: `Thanks — I've logged this and sent it to the dev team.\\n\\n📝 Task: ${taskTitle}\\n🔗 Track: ${clickupUrl}`,\n    final_status: 'task_created',\n    clickup_url: clickupUrl,\n    from: $('Build Task Payload').first().json.from,\n    phone_number_id: $('Build Task Payload').first().json.phone_number_id,\n    recipientPhoneNumber: $('WhatsApp Trigger').first().json.messages[0].from\n  }\n}];"
+      },
+      "id": "bb020af2-ff0b-4130-802b-b055524d1040",
+      "name": "Build Success Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3056,
+        14720
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "task_logs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$now.toISO()}}",
+            "phone": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "client_name": "={{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}",
+            "project_name": "={{ $('Parse Json').item.json.ai_result.project_name }}",
+            "request_type": "={{ $('Parse Json').item.json.ai_result.request_type }}",
+            "title": "={{ $('Parse Json').item.json.ai_result.title }}",
+            "description": "={{ $('Parse Json').item.json.ai_result.description }}",
+            "priority": "={{ $('Parse Json').item.json.ai_result.priority }}",
+            "urgency": "={{ $('Parse Json').item.json.ai_result.urgency }}",
+            "slack_sent": "yes",
+            "clickup_created": "yes",
+            "clickup_url": "={{$node['Create ClickUp Task'].json.url || $node['Create ClickUp Task'].json.body?.url || ''}}",
+            "status": "task_created",
+            "assigned_developers": "={{ $('Build Task Payload').item.json.assigned_developer_names.join(', ') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_name",
+              "displayName": "client_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "request_type",
+              "displayName": "request_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_developers",
+              "displayName": "assigned_developers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slack_sent",
+              "displayName": "slack_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_created",
+              "displayName": "clickup_created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_url",
+              "displayName": "clickup_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "e83ae5b4-4d50-42f4-bd71-8a6d70791145",
+      "name": "Log Task Entry",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -3264,
+        14720
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "client_name": "={{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}",
+            "project_name": "={{ $('Parse Json').item.json.ai_result.project_name }}",
+            "state": "task_created",
+            "collected_messages": "={{ $('WhatsApp Trigger').item.json.messages[0].text?.body || '' }}",
+            "clickup_url": "={{$node['Create ClickUp Task'].json.url || $node['Create ClickUp Task'].json.body?.url || ''}}",
+            "clickup_task_id": "={{$node['Create ClickUp Task'].json.id || ''}}",
+            "asked_questions": "=[]",
+            "task_status": "task_created",
+            "last_task_summary": "={{ $('Parse Json').item.json.ai_result.summary_for_team }}",
+            "conversation_key": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "conversation_key",
+              "displayName": "conversation_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_name",
+              "displayName": "client_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "collected_messages",
+              "displayName": "collected_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_questions",
+              "displayName": "asked_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_task_id",
+              "displayName": "clickup_task_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_url",
+              "displayName": "clickup_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "task_status",
+              "displayName": "task_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_task_summary",
+              "displayName": "last_task_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "fe21d2a9-f4cf-4e06-b54e-0b9ff3268361",
+      "name": "Save Task Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -3456,
+        14720
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "https://app.slack.com/client/{{SLACK_TEAM_ID}}/{{CHANNEL_ID}}",
+          "mode": "url"
+        },
+        "text": "={{ $('Build Task Payload').item.json.slack_message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -3888,
+        14688
+      ],
+      "id": "f41570ae-d931-4b99-b18a-f8f0a1f93101",
+      "name": "Send a message",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -3536,
+        14224
+      ],
+      "id": "03e03f2a-d97f-403a-abb6-aa6a3cf3b8a4",
+      "name": "Upload Slack File (New)",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.clickup.com/api/v2/task/' + $node['Create ClickUp Task'].json.id + '/attachment'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{CLICKUP_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachment",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "053e6fb9-58cf-4d5c-851c-1539b06420dc",
+      "name": "Upload ClickUp Attachment (New)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3808,
+        14160
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4032,
+        14160
+      ],
+      "id": "dbebff86-2fb4-4e6b-a795-a33b571dc312",
+      "name": "Download Upload File (New)",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{$('Build Task Payload').first().json.attachment?.id || ''}}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -4256,
+        14160
+      ],
+      "id": "dad7624d-ceae-4ba6-86c9-2a6fc8f0ca13",
+      "name": "Get Upload Media URL (New)",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{Boolean($('Build Task Payload').first().json.attachment?.id).toString()}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "591f6b68-3eb3-4b32-815e-5a112bc2c7fe"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef68959d-222a-4bfb-8c19-6d8cd1638d02",
+      "name": "Has Attachment? (New)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -4480,
+        14240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ai = $input.first().json.ai_result;\n\nconst priorityMap = { 'Urgent': 1, 'High': 2, 'Medium': 3, 'Low': 4 };\nconst priority = priorityMap[ai.priority] || 3;\n\nconst tags = [\n  'whatsapp',\n  ai.request_type,\n  ai.module,\n  ai.urgency\n].filter(t => typeof t === 'string' && t.trim().length > 0);\n\nconst description = [\n  `Type: ${ai.request_type     || 'N/A'}`,\n  `Module: ${ai.module         || 'N/A'}`,\n  `Priority: ${ai.priority     || 'N/A'}`,\n  `Urgency: ${ai.urgency       || 'N/A'}`,\n  `Size: ${ai.estimated_category || 'N/A'}`,\n  '',\n  '── Description ──',\n  ai.description || '',\n  '',\n  '── Summary for team ──',\n  ai.summary_for_team || '',\n  '',\n  '── Source ──',\n  `Client: ${ai.client_name   || 'Unknown'}`,\n  `Project: ${ai.project_name || 'Unknown'}`,\n  'Via: WhatsApp'\n].join('\\n');\n\nconst body = {\n  name:        ai.title,\n  description: description,\n  assignees:   Array.isArray($input.first().json.clickup_assignees)\n                 ? $input.first().json.clickup_assignees\n                 : [],\n  priority:    priority,\n  tags:        tags,\n  status:      'Open',\n  notify_all:  true\n};\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    clickup_list_id: ai.clickup_list_id,\n    clickup_body:    body\n  }\n}];"
+      },
+      "id": "5e17b2c5-fdcd-44bb-b79f-bddebd0abbca",
+      "name": "Build Task Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4976,
+        14240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    reply_message: $('Parse Json').first().json.ai_result.clarification_question,\n    final_status: 'awaiting_client_clarification',\n    from: $('WhatsApp Trigger').first().json.messages[0].from,\n    phone_number_id: $('WhatsApp Trigger').first().json.metadata.phone_number_id,\n    recipientPhoneNumber: $('WhatsApp Trigger').first().json.messages[0].from\n  }\n}];"
+      },
+      "id": "41a9d3b4-522b-4e4f-a164-ffe8cfacd7b6",
+      "name": "Build Clarification Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4704,
+        13984
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "client_name": "={{ $('Parse Json').item.json.ai_result.client_name }}",
+            "project_name": "={{ $('Parse Json').item.json.ai_result.project_name }}",
+            "state": "awaiting_client_clarification",
+            "collected_messages": "={{ $('WhatsApp Trigger').item.json.messages[0].text?.body || '' }}",
+            "asked_questions": "={{JSON.stringify([...($('Parse Json').item.json.ai_result.asked_questions || []), $('Parse Json').item.json.ai_result.clarification_question])}}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "conversation_key",
+              "displayName": "conversation_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_name",
+              "displayName": "client_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "collected_messages",
+              "displayName": "collected_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_questions",
+              "displayName": "asked_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "1db49b9c-4cad-4b7a-b680-eb925194075c",
+      "name": "Save Conversation (Clarifying)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -4976,
+        13984
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "9e87ae93-1bce-4d60-9329-4726906682a5",
+              "leftValue": "={{String(Boolean($json.ai_result?.needs_clarification) && (($('Parse Json').item.json.ai_result.asked_questions || []).length <= 1))}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "71e7f4b8-f676-47fb-98d2-98a7ccc692a7",
+      "name": "Needs Clarification?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5264,
+        14128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    reply_message: \"Got it 👍 Is this about the same issue as before, or is this a new request?\",\n    final_status: 'awaiting_update_or_new_issue',\n    from: $('WhatsApp Trigger').first().json.messages[0].from,\n    phone_number_id: $('Normalize Incoming Message').first().json.phone_number_id,\n    recipientPhoneNumber: $('WhatsApp Trigger').first().json.messages[0].from\n  }\n}];"
+      },
+      "id": "a33ec8b2-1dad-4bf9-b495-7b6be4386758",
+      "name": "Build Duplicate Protection Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5808,
+        13840
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "client_name": "={{ $('Parse Json').item.json.ai_result.client_name }}",
+            "project_name": "={{ $json.ai_result.project_name }}",
+            "state": "awaiting_update_or_new_issue",
+            "asked_questions": "={{JSON.stringify($('Parse Json').item.json.ai_result.asked_questions || [])}}",
+            "collected_messages": "={{ $('WhatsApp Trigger').item.json.messages[0].text?.body || '' }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "conversation_key",
+              "displayName": "conversation_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_name",
+              "displayName": "client_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "collected_messages",
+              "displayName": "collected_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_questions",
+              "displayName": "asked_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_task_id",
+              "displayName": "clickup_task_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "clickup_url",
+              "displayName": "clickup_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "task_status",
+              "displayName": "task_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_task_summary",
+              "displayName": "last_task_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "5f343b3d-9948-4a1f-911c-63971e6b79f7",
+      "name": "Save Awaiting Update/New",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -6096,
+        13840
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ai_result.action_mode }}",
+                    "rightValue": "ask_update_or_new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "27b772f6-d663-40d6-986d-05d66a2102f4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ask"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ai_result.action_mode }}",
+                    "rightValue": "continue_previous",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "886798bc-0812-4fa4-bb3f-9ecef4a70dff"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Continue"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ai_result.action_mode }}",
+                    "rightValue": "start_new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eb52a3d8-d7be40bd-8995-c525ccd8ebdd"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ai_result.action_mode }}",
+                    "rightValue": "update_existing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "279ec7a3-c429-414a-8881-4b916ce95231"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Update"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "51438922-51f9-4bac-b263-a4dc1816b25d",
+      "name": "Action Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -6624,
+        14048
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $input.first().json;\n\nlet parsed = {};\n\ntry {\n  let raw = row.output || row.text || row.response || '';\n\n  if (typeof raw === 'object') {\n    parsed = raw;\n  } else {\n    raw = String(raw)\n      .replace(/```json/gi, '')\n      .replace(/```/g, '')\n      .trim();\n\n    const start = raw.indexOf('{');\n    const end = raw.lastIndexOf('}');\n\n    if (start !== -1 && end !== -1) {\n      parsed = JSON.parse(raw.slice(start, end + 1));\n    }\n  }\n} catch (e) {\n  parsed = {\n    project_name: 'Unknown',\n    clickup_list_id: '',\n    clickup_task_id: '',\n    title: 'Parse Error',\n    description: 'AI output invalid JSON'\n  };\n}\n\nreturn [\n  {\n    json: {\n      ...row,\n      ai_result: parsed\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7072,
+        14080
+      ],
+      "id": "bf73ac01-7e7e-4550-b01f-c00ef3896487",
+      "name": "Parse Json"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2,
+          "mode": "list",
+          "cachedResultName": "developers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=2"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -7136,
+        14400
+      ],
+      "id": "c9509f7f-ea24-40e6-8205-43208516d6fb",
+      "name": "Get Developers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "phone",
+              "lookupValue": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -7280,
+        14400
+      ],
+      "id": "c5b70714-5cff-413f-a5bf-19a69a4a0e0a",
+      "name": "Get Conversations",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get all projects for this client from Google Sheets by phone number",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "clients_projects",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "phone",
+              "lookupValue": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -6992,
+        14384
+      ],
+      "id": "d12e0b58-12d1-4cd0-99bc-f7c7050705c2",
+      "name": "Get Projects",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$json.conversation_key || ($json.phone_raw ? $json.phone_raw + '|general' : $('WhatsApp Trigger').first().json.messages[0].from + '|general')}}",
+        "contextWindowLength": 12
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -7488,
+        14400
+      ],
+      "id": "fcb2cc46-7438-46a8-964c-a2236cac2ed9",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "79df2149-61f2-4e55-bb9f-03bc2477df41",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -7664,
+        14400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('WhatsApp Trigger').item.json.messages[0].text?.body || $('Normalize Incoming Message').first().json.client_message || '' }}",
+        "options": {
+          "systemMessage": "You are an intelligent task intake assistant for a software development agency.\nClients message you via WhatsApp with bug reports, feature requests, support questions, or general messages.\n\nYour job is to:\n\nUnderstand intent\nCollect missing information (if needed)\nAvoid creating unnecessary tasks\nStructure valid tasks for ClickUp only when appropriate\n🚨 CORE PRINCIPLE\n\n👉 Do NOT create tasks unless the user clearly describes a real issue, request, or support need.\n\nSimple messages like greetings must NEVER become tasks.\n\n🧠 YOUR TOOLS\nGet Projects → Fetch all projects linked to client phone number\n(project_name, project_code, clickup_list_id, developers[])\nGet Developers → Fetch all developers with name, roles, projects_codes, slack_id, clickup_user_id, active status\nGet Tasks → Fetch existing tasks for this phone number (clickup_task_id, clickup_url)\nGet Conversations → Fetch conversation state using:\nconversation_key = {phone}|{project_code}\n🔴 STEP 0 — INTENT CHECK (VERY IMPORTANT)\n\nBefore doing anything:\n\nIdentify message intent:\n❌ NO TASK INTENT (DO NOT CREATE TASK)\n\nExamples:\n\n\"Hi\"\n\"Hello\"\n\"Hey\"\n\"Good morning\"\n\"Ok\"\n\"Thanks\"\n\"How are you?\"\n\n👉 Behavior:\n\nDO NOT call task flow\nDO NOT assign developers\nDO NOT create ClickUp task\n\nInstead respond with:\n\n{\n  \"request_type\": \"Support Question\",\n  \"title\": \"\",\n  \"description\": \"\",\n  \"action_mode\": \"ask_update_or_new\",\n  \"needs_clarification\": true,\n  \"clarification_question\": \"Hi 👋 How can I help you today? Are you reporting a bug or requesting a feature?\",\n  \"assigned_developers\": []\n}\n⚠️ PARTIAL INTENT\n\nExamples:\n\n\"I have an issue\"\n\"Something is not working\"\n\"Bug in dashboard\"\n\n👉 Behavior:\n\nAsk ONE clarification question\nDo NOT create task yet\n✅ CLEAR INTENT\n\nExamples:\n\n\"Login page shows 500 error\"\n\"Need add export button in report page\"\n\n👉 Proceed to full workflow\n\n📌 STEP 1 — LOAD CONTEXT\nCall Get Projects\nCall Get Conversations\nCall Get Tasks (if available)\n📌 STEP 2 — IDENTIFY PROJECT\nIf only one project → auto select\nIf multiple projects and unclear → ask clarification\nIf still unclear after 2 attempts → choose most recent active project\n📌 STEP 3 — DETERMINE ACTION MODE\naction_mode\tWhen to use\nstart_new\tNew issue or first interaction\ncontinue_previous\tClient is replying to your question\nupdate_existing\tExisting task already created and client adds info\nask_update_or_new\tUnclear if new issue or update\n📌 STEP 4 — TASK COMPLETENESS RULE\n\nA task is READY only if:\n\nProject identified\nClear actionable intent exists\nProblem or request is understandable\nScreen/feature context is available (or inferred)\n\nIf missing info:\n\nAsk ONLY ONE question\nMax 2 questions per conversation total\n\n📌 STEP 5 — ASSIGN DEVELOPERS\n\nMust Assign Developer for new task based on projects_codes and roles\n\nRole Mapping:\n\nUI / frontend / design → Frontend Developer\nAPI / auth / backend → Backend Developer\nMobile → mobile dev\nDevOps / hosting / deploy → DevOps\nFull Stack Developer ->most senior active developer\nUnknown → most senior active developer\n\n⚠️ NEVER invent developer names\n\n📤 OUTPUT FORMAT (STRICT JSON ONLY)\n\nReturn ONLY raw JSON:\n\n{\n  \"project_name\": \"\",\n  \"client_name\": \"\",\n  \"clickup_list_id\": \"\",\n  \"clickup_task_id\": \"\",\n  \"request_type\": \"Bug | Feature Request | Improvement | Support Question | Urgent Issue\",\n  \"title\": \"\",\n  \"description\": \"\",\n  \"module\": \"\",\n  \"priority\": \"Low | Medium | High\",\n  \"urgency\": \"Low | Normal | Urgent\",\n  \"needs_clarification\": false,\n  \"clarification_question\": \"\",\n  \"assigned_developers\": [],\n  \"estimated_category\": \"Small | Medium | Large\",\n  \"summary_for_team\": \"\",\n  \"action_mode\": \"start_new | continue_previous | update_existing | ask_update_or_new\"\n}\n\n📏 RULES\nNever create tasks for greetings or non-intent messages\nNever ask more than 2 questions total per conversation\nAlways prefer existing task from Get Tasks\nKeep clarification question short and human-friendly\nsummary_for_team must be 1–2 lines for developers\nclickup_task_id must come from Get Tasks or conversation\nIf unsure → ask instead of guessing\nBe helpful, polite, and natural (like a support engineer)\n\n💬 TONE GUIDELINE\nFriendly but professional\nHuman-like support assistant\nNo robotic or overly technical wording when asking questions\nKeep questions simple and conversational"
+        }
+      },
+      "id": "966b7798-74b4-48cc-a2d9-ce43797407c0",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -7424,
+        14080
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const trigger = $('WhatsApp Trigger').first().json;\nconst inbound = trigger.messages?.[0] || {};\nconst msg = $json.message?.text || '';\n\nlet attachment = null;\nif (inbound.type === 'document' && inbound.document) {\n  attachment = {\n    type: 'document',\n    id: inbound.document.id || '',\n    filename: inbound.document.filename || 'Attachment',\n    mime_type: inbound.document.mime_type || '',\n    caption: inbound.document.caption || ''\n  };\n} else if (inbound.type === 'image' && inbound.image) {\n  const ext = (inbound.image.mime_type || '').split('/')[1] || 'jpg';\n  attachment = {\n    type: 'image',\n    id: inbound.image.id || '',\n    filename: `image_${inbound.image.id || Date.now()}.${ext}`,\n    mime_type: inbound.image.mime_type || '',\n    caption: inbound.image.caption || ''\n  };\n}\n\nreturn [{\n  json: {\n    from: trigger.contacts?.[0]?.wa_id ? `whatsapp:+${trigger.contacts[0].wa_id}` : '',\n    phone_raw: inbound.from || '',\n    client_message: msg,\n    client_name: trigger.contacts?.[0]?.profile?.name || 'Unknown Client',\n    timestamp: new Date().toISOString(),\n    phone_number_id: trigger.metadata?.phone_number_id || '',\n    attachment,\n    raw_payload: trigger\n  },\n  binary: $input.item.binary\n}];"
+      },
+      "id": "6a106c5c-c669-4206-a0a3-006296bae2e1",
+      "name": "Normalize Incoming Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7808,
+        14080
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "message.text",
+              "type": "string",
+              "value": "={{$json.messages?.[0]?.document?.caption || ('[File] ' + ($json.messages?.[0]?.document?.filename || 'Attachment'))}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "31ecbb83-474d-4029-b999-d5dfbb4a8374",
+      "name": "Normalize Document Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -8112,
+        14400
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8640,
+        14400
+      ],
+      "id": "362e8ba6-6987-4823-a42a-0760116d1a32",
+      "name": "Download Document",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{$('WhatsApp Trigger').first().json.messages?.[0]?.document?.id || ''}}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -8896,
+        14400
+      ],
+      "id": "07bbd583-ee17-467d-984f-c013368541f7",
+      "name": "Get Document Media URL",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "message.text",
+              "type": "string",
+              "value": "={{$json.content || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "329976f6-dc2f-4501-abc2-01414fff1939",
+      "name": "Normalize Image Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -8112,
+        14240
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Extract the useful meaning from this client image message for a software support workflow. If it contains a screenshot of a bug, summarize the issue. If it contains UI or app content, describe the likely issue or request. Return plain text only.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "e1013941-da62-47b8-925e-1d74bd63b5b4",
+      "name": "Analyze Image",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -8368,
+        14240
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8640,
+        14240
+      ],
+      "id": "f959fecf-afac-4298-a052-8ea6d1191fed",
+      "name": "Download Image",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{$('WhatsApp Trigger').first().json.messages?.[0]?.image?.id || ''}}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -8896,
+        14240
+      ],
+      "id": "fc20838f-5cae-49a0-8a6a-55e4aea83822",
+      "name": "Get Image Media URL",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "message.text",
+              "type": "string",
+              "value": "={{$json.text || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb6ecc39-41d9-442d-9c77-aef7284bbe61",
+      "name": "Normalize Audio Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -8112,
+        14080
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "b12adb58-0226-4a2a-a3a5-d8edf5092f4c",
+      "name": "Transcribe Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -8368,
+        14080
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8640,
+        14080
+      ],
+      "id": "9d04d548-6bbb-4279-9915-b1f3a798cb2b",
+      "name": "Download Audio",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{$('WhatsApp Trigger').first().json.messages?.[0]?.audio?.id || ''}}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -8896,
+        14080
+      ],
+      "id": "59e18d11-91cf-4022-9f67-7e73bbfcbe4e",
+      "name": "Get Audio Media URL",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "message.text",
+              "type": "string",
+              "value": "={{$json.messages?.[0]?.text?.body || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "684ce303-4ab5-49b6-abaa-b601b49fa9de",
+      "name": "Normalize Text Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -8896,
+        13920
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messages?.[0]?.type}}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3ced3db3-4115-4577-bb97-ecbc32716728"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messages?.[0]?.type}}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "87da216f-867d-4ea9-af0a-a33980bd8b39"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messages?.[0]?.type}}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7e39ad25-525f-4407-a6b9-8f388ebf51c8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messages?.[0]?.type}}",
+                    "rightValue": "document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c038f9e8-bef4-4a15-99c2-388456ba746f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Document"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7fe61047-0610-44af-a71c-f57ce850f4bb",
+      "name": "Message Type Router",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -9168,
+        14080
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -9424,
+        14080
+      ],
+      "id": "e66e6f15-9305-456c-8742-fd964f53413f",
+      "name": "WhatsApp Trigger",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.clickup.com/api/v2/list/' +  $json.clickup_list_id+ '/task'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{CLICKUP_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n(function() {\n  const priorityMap = { 'Urgent': 1, 'High': 2, 'Medium': 3, 'Low': 4 };\n  const urgencyMap  = { 'Urgent': 1, 'Normal': 3, 'Low': 4 };\n\n  const priority = priorityMap[$json.ai_result.priority] || 3;\n\n  const tags = [\n    'whatsapp',\n    $json.ai_result.request_type,\n    $json.ai_result.module,\n    $json.ai_result.urgency\n  ].filter(t => typeof t === 'string' && t.trim().length > 0);\n\n  const description = [\n    `📌 Type: ${$json.ai_result.request_type || 'N/A'}`,\n    `🧩 Module: ${$json.ai_result.module || 'N/A'}`,\n    `🔥 Priority: ${$json.ai_result.priority || 'N/A'}`,\n    `⏱️ Urgency: ${$json.ai_result.urgency || 'N/A'}`,\n    `📐 Size: ${$json.ai_result.estimated_category || 'N/A'}`,\n    '',\n    '── Description ──',\n    $json.ai_result.description || '',\n    '',\n    '── Summary for team ──',\n    $json.ai_result.summary_for_team || '',\n    '',\n    '── Source ──',\n    `Client: ${$json.ai_result.client_name || 'Unknown'}`,\n    `Project: ${$json.ai_result.project_name || 'Unknown'}`,\n    `Via: WhatsApp`\n  ].join('\\n');\n\n  return {\n    'name': $json.ai_result.title,\n    'description': description,\n    'assignees': Array.isArray($json.clickup_assignees) ? $json.clickup_assignees : [],\n    'priority': priority,\n    'tags': tags,\n    'status': 'Open',\n    'notify_all': true\n  };\n})();\n}}",
+        "options": {}
+      },
+      "id": "bd1ed9a2-f777-4a23-9651-0119cc3d2908",
+      "name": "Create ClickUp Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4688,
+        14240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pulls clickup_task_id correctly from conversation record via AI result\nconst aiResult = $input.first().json.ai_result;\nconst projectName = aiResult.project_name || '';\nconst clientName  = aiResult.client_name  || '';\nconst newInfo     = aiResult.description  || $input.first().json.client_message || '';\nconst summaryForTeam = aiResult.summary_for_team || '';\n\n// FIXED: read clickup_task_id, never clickup_list_id\nconst taskId =  $input.first().json.ai_result.clickup_task_id|| '';\nconst clickupUrl = `https://app.clickup.com/t/${$input.first().json.ai_result.clickup_task_id}`;\n\nconst attachmentFilename = $input.first().json.attachment?.filename || '';\nconst attachmentText = attachmentFilename ? `\\n\\nAttachment: ${attachmentFilename}` : '';\n\nconst devSlackMentions = (Array.isArray(aiResult.assigned_developers)\n  ? aiResult.assigned_developers\n  : []\n).map(d => `<@${String(d.slack_id || d).replace(/^@/, '')}>`).join(' ');\n\n// FIXED: description is a plain string — no nested object\nconst updatedDescription = [\n  '[UPDATED by client]',\n  '',\n  `New information from ${clientName}:`,\n  newInfo,\n  attachmentText,\n  '',\n  '── Summary ──',\n  summaryForTeam\n].join('\\n');\n\nconst slackUpdateMessage = [\n  '🔄 *Task Updated by Client*',\n  '',\n  `🏢 *Project:* ${projectName}`,\n  `👤 *Client:* ${clientName}`,\n  '',\n  '💬 *New info:*',\n  newInfo,\n  attachmentText,\n  '',\n  `🔗 *Task:* ${clickupUrl}`,\n  '',\n  `👨‍💻 *Devs:* ${devSlackMentions || 'Not Assigned'}`\n].join('\\n');\n\nreturn [{\n  json: {\n    // carry forward everything needed downstream\n    client_name:          clientName,\n    project_name:         projectName,\n    summary_for_team:     summaryForTeam,\n    client_message:       newInfo,\n    clickup_task_id:      taskId,\n    clickup_url:          clickupUrl,\n    phone_number_id:      $input.first().json.phone_number_id,\n    attachment:           $input.first().json.attachment || null,\n    // FIXED: flat string, not a nested object\n    clickup_description:  updatedDescription,\n    slack_update_message: slackUpdateMessage\n  },\n  binary: $input.item.binary\n}];"
+      },
+      "id": "6d1a472e-62d9-470f-8e81-796cfb8c08b8",
+      "name": "Build Update Task Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5760,
+        14880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{Boolean($json.attachment?.id).toString()}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2e3a6d1f-009d-4594-97b9-a9bb48fc3ce3",
+      "name": "Has Attachment? (Update)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5536,
+        14880
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{$json.attachment?.id || ''}}"
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -5312,
+        15088
+      ],
+      "id": "d26ed4ee-cc1f-49fa-bbbf-0db1ec49db98",
+      "name": "Get Upload Media URL (Update)",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5088,
+        15088
+      ],
+      "id": "514fe875-5888-41df-a0eb-9bef913ac745",
+      "name": "Download Upload File (Update)",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.clickup.com/api/v2/task/' + $node['Update ClickUp Task'].json.id + '/attachment'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{CLICKUP_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachment",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55547afd-1dde-4ba7-9a3f-505f6493ed5f",
+      "name": "Upload ClickUp Attachment (Update)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4864,
+        15088
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -4640,
+        15088
+      ],
+      "id": "fc41131f-2906-41de-b7ae-a743e96c924a",
+      "name": "Upload Slack File (Update)",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{'https://api.clickup.com/api/v2/task/' +  $('Build Update Task Payload').item.json.clickup_task_id}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "{{CLICKUP_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ description: $json.clickup_description }) }}",
+        "options": {}
+      },
+      "id": "0b25e0c7-9119-4f96-b7cd-b83d8d6c02cf",
+      "name": "Update ClickUp Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5312,
+        14784
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "https://app.slack.com/client/{{SLACK_TEAM_ID}}/{{CHANNEL_ID}}",
+          "mode": "url"
+        },
+        "text": "={{ $('Build Update Task Payload').item.json.slack_update_message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -5088,
+        14784
+      ],
+      "id": "35cf81dd-fcc5-494b-a628-e7ac11448bb3",
+      "name": "Send Slack Update Alert",
+      "webhookId": "{{WEBHOOK_ID}}",
+      "credentials": {
+        "slackApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+            "client_name": "={{ $('Build Update Task Payload').item.json.client_name }}",
+            "project_name": "={{ $('Build Update Task Payload').item.json.project_name }}",
+            "state": "task_updated",
+            "collected_messages": "={{ $('Build Update Task Payload').item.json.client_message }}",
+            "clickup_url": "={{ $('Build Update Task Payload').item.json.clickup_url }}",
+            "asked_questions": "=[]",
+            "clickup_task_id": "={{ $('Build Update Task Payload').item.json.clickup_task_id }}",
+            "task_status": "updated",
+            "last_task_summary": "={{ $('Build Update Task Payload').item.json.summary_for_team }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_name",
+              "displayName": "client_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "project_name",
+              "displayName": "project_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "collected_messages",
+              "displayName": "collected_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_url",
+              "displayName": "clickup_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asked_questions",
+              "displayName": "asked_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clickup_task_id",
+              "displayName": "clickup_task_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "task_status",
+              "displayName": "task_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_task_summary",
+              "displayName": "last_task_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "f5c5e51b-9a56-4905-9dc7-05d8e03497ff",
+      "name": "Save Updated Conversation",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -4864,
+        14784
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $('Build Update Task Payload').first().json;\nconst clickupUrl = payload.clickup_url || 'your task';\n\nreturn [{\n  json: {\n    reply_message: `Got it! I've added your update to the existing task and notified the dev team. 🔄\\n\\n🔗 Track here: ${clickupUrl}`,\n    final_status: 'task_updated',\n    from: $('WhatsApp Trigger').first().json.messages[0].from,\n    phone_number_id: payload.phone_number_id || $('WhatsApp Trigger').first().json.metadata.phone_number_id,\n    recipientPhoneNumber: $('WhatsApp Trigger').first().json.messages[0].from\n  }\n}];"
+      },
+      "id": "5ee81008-dd94-4bbd-8be8-9dd3279bb544",
+      "name": "Build Update Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4640,
+        14784
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 3,
+          "mode": "list",
+          "cachedResultName": "task_logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=3"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "phone",
+              "lookupValue": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -6848,
+        14384
+      ],
+      "id": "5c0da1e4-9733-4026-89cd-fadc2280101a",
+      "name": "Get Tasks",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Build Success Reply": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Task Entry": {
+      "main": [
+        [
+          {
+            "node": "Build Success Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Task Record": {
+      "main": [
+        [
+          {
+            "node": "Log Task Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Save Task Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload ClickUp Attachment (New)": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Slack File (New)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Upload File (New)": {
+      "main": [
+        [
+          {
+            "node": "Upload ClickUp Attachment (New)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Upload Media URL (New)": {
+      "main": [
+        [
+          {
+            "node": "Download Upload File (New)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Attachment? (New)": {
+      "main": [
+        [
+          {
+            "node": "Get Upload Media URL (New)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Task Payload": {
+      "main": [
+        [
+          {
+            "node": "Create ClickUp Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Clarification Reply": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Conversation (Clarifying)": {
+      "main": [
+        [
+          {
+            "node": "Build Clarification Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Clarification?": {
+      "main": [
+        [
+          {
+            "node": "Save Conversation (Clarifying)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Task Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Duplicate Protection Reply": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Awaiting Update/New": {
+      "main": [
+        [
+          {
+            "node": "Build Duplicate Protection Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action Router": {
+      "main": [
+        [
+          {
+            "node": "Save Awaiting Update/New",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Task Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Needs Clarification?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Update Task Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Json": {
+      "main": [
+        [
+          {
+            "node": "Action Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Developers": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversations": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Projects": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Incoming Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Document Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Incoming Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Document": {
+      "main": [
+        [
+          {
+            "node": "Normalize Document Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Document Media URL": {
+      "main": [
+        [
+          {
+            "node": "Download Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Image Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Incoming Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Image": {
+      "main": [
+        [
+          {
+            "node": "Normalize Image Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Analyze Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Media URL": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Audio Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Incoming Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Normalize Audio Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio Media URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Text Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Incoming Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Type Router": {
+      "main": [
+        [
+          {
+            "node": "Normalize Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Audio Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Image Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Document Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message Type Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create ClickUp Task": {
+      "main": [
+        [
+          {
+            "node": "Has Attachment? (New)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Update Task Payload": {
+      "main": [
+        [
+          {
+            "node": "Has Attachment? (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Attachment? (Update)": {
+      "main": [
+        [
+          {
+            "node": "Get Upload Media URL (Update)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update ClickUp Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update ClickUp Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Upload Media URL (Update)": {
+      "main": [
+        [
+          {
+            "node": "Download Upload File (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Upload File (Update)": {
+      "main": [
+        [
+          {
+            "node": "Upload ClickUp Attachment (Update)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Slack File (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update ClickUp Task": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Update Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Slack Update Alert": {
+      "main": [
+        [
+          {
+            "node": "Save Updated Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Updated Conversation": {
+      "main": [
+        [
+          {
+            "node": "Build Update Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Update Reply": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

@@ -18,6 +18,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [AI Website Chatbot with Appointment Booking](n8n/website-chatbot-appointment-booking/) | Multi-agent website chatbot that answers FAQs, captures leads and books appointments with memory | OpenAI, Gemini, Cal.com, REST API |
 | [Facebook Page AI Sales & Order Chatbot](n8n/facebook-page-order-chatbot/) | Bilingual Messenger bot that answers from a live product sheet and saves confirmed orders | Gemini, Google Sheets, Meta Graph API |
 | [AI UGC Product Ad Generator (Nano Banana + Veo 3.1)](n8n/ai-ugc-image-to-video-nanobanana-veo/) | Turns a product photo into a UGC-style lifestyle image and a short AI video ad | OpenAI, Vertex AI (Nano Banana, Veo 3.1), Google Sheets, Google Drive |
+| [WhatsApp Client Task Intake to ClickUp & Slack](n8n/whatsapp-task-intake-clickup/) | AI agent turns client WhatsApp messages (text, voice, images, docs) into assigned ClickUp tasks | WhatsApp Cloud API, OpenAI, ClickUp, Slack, Google Sheets |
 
 ## Data Privacy
 
