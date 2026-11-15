@@ -1,0 +1,165 @@
+{
+  "name": "Bland AI Bilingual Lead Callback",
+  "flow": [
+    {
+      "id": 3,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "{{HOOK_ID}}",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "regexp:Replace",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "text": "{{3.phone}}",
+        "value": "",
+        "global": true,
+        "pattern": "[^0-9]\n​",
+        "multiline": false,
+        "sensitive": false,
+        "singleline": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "util:TextAggregator",
+      "version": 1,
+      "parameters": {
+        "feeder": 7,
+        "rowSeparator": ""
+      },
+      "mapper": {
+        "value": "+1{{7.text}}\n"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 13,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 920,
+          "y": -6
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "bland:sendASimpleCallPathways",
+              "version": 1,
+              "parameters": {
+                "__IMTCONN__": "{{BLAND_CONNECTION_ID}}"
+              },
+              "filter": {
+                "name": "",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{3.language}}",
+                      "b": "french",
+                      "o": "text:equal"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "pathway_id": "{{BLAND_PATHWAY_ID_FRENCH}}",
+                "phone_number": "{{3.phone}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1220,
+                  "y": -306
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 15,
+              "module": "bland:sendASimpleCallPathways",
+              "version": 1,
+              "parameters": {
+                "__IMTCONN__": "{{BLAND_CONNECTION_ID}}"
+              },
+              "mapper": {
+                "pathway_id": "{{BLAND_PATHWAY_ID_ENGLISH}}",
+                "phone_number": "{{3.phone}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1398,
+                  "y": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": null,
+              "module": "placeholder:Placeholder",
+              "metadata": {
+                "designer": {
+                  "x": 1220,
+                  "y": 294
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
