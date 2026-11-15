@@ -30,6 +30,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [HouseCall Pro to GoHighLevel Sync](make/housecall-pro-to-gohighlevel-sync/) | Syncs 11 HouseCall Pro lifecycle events into GoHighLevel contacts and pipeline opportunities | HouseCall Pro, GoHighLevel |
 | [Vapi AI Outbound Calls from Google Drive CSV](make/vapi-outbound-calls-from-drive-csv/) | Drop a lead CSV into Drive and a Vapi AI agent calls every lead (part 1) | Google Drive, Vapi |
 | [Vapi Call Result AI Qualification](make/vapi-call-result-ai-qualification/) | Summarizes call transcripts with OpenAI and classifies leads as qualified or not (part 2) | Vapi, OpenAI, HTTP |
+| [Voice Agent Calendar Availability Check](make/voice-agent-calendar-availability-check/) | Live tool for a voice agent that checks Google Calendar availability mid-call | Bland AI, Google Calendar |
 
 ## Data Privacy
 

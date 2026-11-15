@@ -1,0 +1,130 @@
+{
+  "name": "Voice Agent Calendar Availability Check (Bland AI Tool)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "{{HOOK_ID}}",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": -81,
+          "y": -8
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-calendar:searchEvents",
+      "version": 5,
+      "parameters": {
+        "__IMTCONN__": "{{GOOGLE_CALENDAR_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "limit": "10",
+        "timeMax": "addMinutes(\n  parseDate(\n    {{1.appointment_date}} & \" \" & {{1.appointment_time}};\n    \"dddd, MMMM D, YYYY h:mm A\"\n  );\n  60\n)\n",
+        "timeMin": "parseDate(\n  {{1.appointment_date}} & \" \" & {{1.appointment_time}};\n  \"dddd, MMMM D, YYYY h:mm A\"\n)\n",
+        "calendar": "user@example.com",
+        "singleEvents": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 253,
+          "y": -11
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{2.id}}",
+                      "o": "exist"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "body": "{ \"available\": false }",
+                "status": "200",
+                "headers": []
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -150
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "body": "{ \"available\": true }",
+                "status": "200",
+                "headers": []
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 150
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
