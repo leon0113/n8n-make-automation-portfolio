@@ -35,6 +35,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [ClickUp Task to Zoom Meeting Link](make/clickup-task-zoom-meeting-link/) | Creates a Zoom meeting from a ClickUp checkbox and writes the link back to the task | ClickUp, Zoom |
 | [Google Sheet to CSV Download Webhook](make/google-sheet-csv-export-webhook/) | Serves a live Google Sheet as a downloadable CSV through a webhook URL | Google Sheets, CSV |
 | [Real Estate Lead Round-Robin Assignment](make/real-estate-lead-round-robin-assignment/) | Assigns new leads to the longest-idle agent and syncs them to Notion, Follow Up Boss and JustCall | Airtable, Notion, Follow Up Boss, JustCall |
+| [Notion Users to Airtable Agents Sync](make/notion-users-airtable-agents-sync/) | Keeps the Airtable agent roster in sync with Notion workspace users | Notion, Airtable |
 
 ## Data Privacy
 

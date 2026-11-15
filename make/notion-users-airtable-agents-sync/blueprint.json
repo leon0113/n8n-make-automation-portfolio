@@ -1,0 +1,211 @@
+{
+  "name": "Notion Users to Airtable Agents Sync",
+  "flow": [
+    {
+      "id": 12,
+      "module": "notion:listUsers",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "{{NOTION_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "limit": "100"
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 300
+        }
+      }
+    },
+    {
+      "id": 21,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "duration": "5"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 300
+        }
+      }
+    },
+    {
+      "id": 15,
+      "module": "airtable:ActionSearchRecords",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "base": "{{AIRTABLE_BASE_ID}}",
+        "table": "{{AGENTS_TABLE_ID}}",
+        "formula": "{Notion Email Address} = \"{{12.person_email}}\" ",
+        "maxRecords": "10",
+        "useColumnId": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 300
+        }
+      },
+      "onerror": [
+        {
+          "id": 23,
+          "module": "builtin:Resume",
+          "version": 1,
+          "metadata": {
+            "designer": {
+              "x": 900,
+              "y": 600
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "duration": "5"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 150
+        }
+      }
+    },
+    {
+      "id": 20,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 150
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 18,
+              "module": "airtable:ActionCreateRecord",
+              "version": 3,
+              "parameters": {
+                "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+              },
+              "filter": {
+                "name": "",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{15.`__IMTLENGTH__`}}",
+                      "b": "0",
+                      "o": "text:equal"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "base": "{{AIRTABLE_BASE_ID}}",
+                "table": "{{AGENTS_TABLE_ID}}",
+                "record": {
+                  "{{NAME_FIELD_ID}}": "{{12.name}}",
+                  "{{STATUS_FIELD_ID}}": "Available",
+                  "{{NOTION_USER_ID_FIELD_ID}}": "{{12.id}}",
+                  "{{NOTION_EMAIL_FIELD_ID}}": "{{12.person_email}}",
+                  "{{EMAIL_FIELD_ID}}": {}
+                },
+                "typecast": false,
+                "useColumnId": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 19,
+              "module": "airtable:ActionUpdateRecords",
+              "version": 3,
+              "parameters": {
+                "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+              },
+              "filter": {
+                "name": "",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{15.`__IMTLENGTH__`}}",
+                      "b": "0",
+                      "o": "number:greater"
+                    },
+                    {
+                      "a": "{{15.Name}}",
+                      "b": "{{12.name}}",
+                      "o": "text:notequal"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "id": "{{15.id}}",
+                "base": "{{AIRTABLE_BASE_ID}}",
+                "table": "{{AGENTS_TABLE_ID}}",
+                "record": {
+                  "{{EMAIL_FIELD_ID}}": {
+                    "email": "{{12.person_email}}"
+                  }
+                },
+                "typecast": false,
+                "useColumnId": false
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 300
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
