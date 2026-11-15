@@ -21,6 +21,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [WhatsApp Client Task Intake to ClickUp & Slack](n8n/whatsapp-task-intake-clickup/) | AI agent turns client WhatsApp messages (text, voice, images, docs) into assigned ClickUp tasks | WhatsApp Cloud API, OpenAI, ClickUp, Slack, Google Sheets |
 | [AI Voice Outbound Lead Dispatcher (Retell AI)](n8n/ai-voice-outbound-lead-dispatcher/) | Calls queued leads from a sheet with a Retell AI voice agent (part 1 of an AI calling system) | Retell AI, Google Sheets |
 | [AI Voice Call Handler: GHL Booking & CRM Sync](n8n/ai-voice-call-handler-ghl-booking/) | Backend for the voice agent: checks live availability, books GoHighLevel appointments, logs call summaries (part 2) | Retell AI, GoHighLevel, Google Sheets |
+| [Instagram AI Sales Agent (Multi-Agent)](n8n/instagram-ai-sales-agent-multimodal/) | Multi-agent DM sales bot handling text, voice and images, with catalog search, orders and Mercado Pago checkout | OpenAI, Redis, Google Sheets, Mercado Pago |
 
 ## Make.com Workflows
 

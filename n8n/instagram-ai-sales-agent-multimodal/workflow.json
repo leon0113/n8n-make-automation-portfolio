@@ -1,0 +1,2616 @@
+{
+  "name": "Instagram AI Sales Agent (Multi-Agent, Voice & Image, Mercado Pago)",
+  "nodes": [
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -2432,
+        560
+      ],
+      "id": "ebc49a11-035c-4ca5-bc36-c250697b9ce1",
+      "name": "Merge",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": 8
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1984,
+        576
+      ],
+      "id": "3edab74a-f9ff-47f8-8dc4-55d4a58dff8e",
+      "name": "Wait4",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0880379a-36f8-4c7d-85e7-934113b9d565",
+              "leftValue": "={{ $json.Mensaje.last() }}",
+              "rightValue": "={{ $('Merge').item.json.message.text }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1536,
+        576
+      ],
+      "id": "84238e0f-7a02-4df1-b02d-2e6e6ff9c959",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        672
+      ],
+      "id": "d3251c6c-46b7-40ea-b573-e214056ef725",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "025dbb73-f9d0-4406-8442-b4486ca2f09f",
+              "name": "response",
+              "value": "={{ $('Get').item.json.Mensaje.join() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1312,
+        464
+      ],
+      "id": "0bc3aff8-661b-4d88-904f-2ae3a059078a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "b364916f-2383-48f0-b353-269b7b065121",
+      "name": "Productos Demo",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        384
+      ],
+      "id": "702a7b4a-8e64-4a79-b564-3b1a7c789b82",
+      "name": "Productos Demo1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "54771bfc-a77f-4864-bc2d-65a8eef2cffd",
+              "leftValue": "={{ $json.output}}",
+              "rightValue": "[STATE:READY_FOR_PAYMENT]",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        272
+      ],
+      "id": "cedbbc9b-0e84-4c54-aefa-63c0dbc63782",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order ID": "={{ $json.order.order_id }}",
+            "Date": "={{ $json.order.date }}",
+            "Customer ": "={{ $json.order.customer_name }}",
+            "Phone ": "={{ $json.order.phone }}",
+            "Product": "={{ $json.items[0].title }}",
+            "Quantity ": "={{ $json.items[0].quantity }}",
+            "Unit Price ": "={{ $json.items[0].unit_price }}",
+            "Total Price": "={{ $json.order.total }}",
+            "Payment Status ": "={{ $json.order.payment_status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ",
+              "displayName": "Customer ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity ",
+              "displayName": "Quantity ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Price ",
+              "displayName": "Unit Price ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Price",
+              "displayName": "Total Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Status ",
+              "displayName": "Payment Status ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        16
+      ],
+      "id": "d3f2d709-f57e-42a3-98db-fcfcf22fac56",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ",
+              "displayName": "Customer ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity ",
+              "displayName": "Quantity ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Price ",
+              "displayName": "Unit Price ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Price",
+              "displayName": "Total Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Status ",
+              "displayName": "Payment Status ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1424,
+        112
+      ],
+      "id": "09d19571-4992-4f38-b984-10c84dc285bf",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67a1aeaf-246d-4632-9b1d-fbc9c7559002",
+              "leftValue": "={{ $json.output.parseJson().productos.length > 0 }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -192
+      ],
+      "id": "1a5d9496-f6c7-47f6-b5e5-85614a56c122",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "path": "c9a95a9b-13db-4264-b444-f6c559e30f29",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3760,
+        800
+      ],
+      "id": "64335f59-881c-4010-9133-2a76813dce71",
+      "name": "Webhook",
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "068f7624-b611-43b6-a619-3be9bd7b7391",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.messages[0].type}}",
+                    "rightValue": "text"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "99ab1bdb-f3a6-4359-98da-5a4572443e5a",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.messages[0].type.includes(\"audio\")}}",
+                    "rightValue": ""
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c25b6655-5508-40d6-9643-56c5bf2b98ad",
+                    "leftValue": "={{ $json.messages[0].type.includes(\"image\")}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "02e3a384-2638-47b7-8786-d15250da7e41",
+      "name": "Text | Audio| Image",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -3104,
+        656
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.sessionId }}",
+        "messageData": "={{ $json.message.text }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2208,
+        576
+      ],
+      "id": "5f5be2c0-4fb6-4a06-a54a-ea0da67a60d3",
+      "name": "Push",
+      "credentials": {
+        "redis": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "Mensaje",
+        "key": "={{ $('Merge').item.json.sessionId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        576
+      ],
+      "id": "5c8c8b2d-42d3-4354-bbac-c3ebcc1f6c6f",
+      "name": "Get",
+      "credentials": {
+        "redis": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Merge').item.json.sessionId }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        464
+      ],
+      "id": "3c0f9c9e-8fea-400f-9d0e-4c081c9c3b2c",
+      "name": "Delete",
+      "credentials": {
+        "redis": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a219b8ff-ce92-4e7f-9c4a-1a6f52645135",
+              "name": "message.text",
+              "type": "string",
+              "value": "={{ $json.messages[0].text.body }}"
+            },
+            {
+              "id": "66aca19a-86c6-4060-9bbf-522a2757a79d",
+              "name": "sessionId",
+              "type": "string",
+              "value": "={{ $json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f669a97d-0583-45c9-864e-cb15f5bde65c",
+      "name": "Text",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2656,
+        480
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4982620a-1175-497b-8180-eaac187f8ac8",
+              "name": "message.text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "86dc1f2b-dab3-401d-b500-74b8580a8705",
+              "name": "sessionId",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "766a785f-b771-49e3-be28-629ea406486e",
+      "name": "Audio Transcript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2656,
+        672
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "da5ee722-7cdd-4d14-95f9-62cab3e46538",
+      "name": "Audio Transcript AI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -2880,
+        672
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4982620a-1175-497b-8180-eaac187f8ac8",
+              "name": "message.text",
+              "type": "string",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "id": "86dc1f2b-dab3-401d-b500-74b8580a8705",
+              "name": "sessionId",
+              "type": "string",
+              "value": "={{ $('Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0679e8f3-3609-43d1-95c1-b1b97abe3727",
+      "name": "Image Transcript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2656,
+        864
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "inputType": "base64",
+        "options": {}
+      },
+      "id": "eaf4db36-37af-4eef-87ec-e8b6c005d33a",
+      "name": "Image Transcript AI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -2880,
+        864
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Edit Fields').item.json.response }}",
+        "options": {
+          "systemMessage": "=Eres el Agente Orquestador de ventas de Fabrikam Apparel para una tienda de ropa.\n\nTu única función es clasificar el mensaje del usuario y devolver únicamente el nombre del agente correspondiente.\n\n- No debes responder al usuario.\n- No debes explicar nada.\n- No debes agregar texto adicional.\n- No debes hacer preguntas.\n\nTu salida debe ser exactamente una línea con el nombre del agente.\n\n🌎 IDIOMA\n\n- El usuario puede escribir en español o en inglés.\n- Debes entender ambos idiomas perfectamente y clasificar correctamente.\n\n🎯 OBJETIVO\n\n- Analizar la intención principal del mensaje y asignarlo al agente correcto.\n\n📌 AGENTES DISPONIBLES (RESPUESTA EXACTA)\n\nDebes responder únicamente uno de los siguientes valores exactos:\n\n- Agente Catálogo\n- Agente Cotización\n- Agente Información general\n- Agente Conversacional\n\nNo puedes responder nada diferente a estos nombres.\n\n🔥 REGLAS DE CLASIFICACIÓN\n\n1. Agente Catálogo\n\nSi el mensaje trata sobre productos o disponibilidad, o menciona temas como:\n\n- productos\n- catálogo\n- catalog\n- ropa\n- prendas\n- camisetas\n- camisas\n- pantalones\n- jeans\n- chaquetas\n- hoodies\n- gorras\n- zapatos\n- tenis\n- accesorios\n- talla\n- size\n- color\n- referencia\n- precio de un producto\n- stock\n- disponibilidad\n- available\n- descripción\n- photos\n- fotos\n- imágenes\n- image\n- mostrar productos\n- ver productos\n- quiero ver\n- what do you have\n\nEnviar a:\n\nAgente Catálogo\n\n2. Agente Cotización\n\nSi el mensaje trata sobre intención de compra, carrito, pedido o envío, o menciona temas como:\n\n- quiero comprar\n- me interesa comprar\n- llévame\n- agregar al carrito\n- add to cart\n- carrito\n- cart\n- cotización\n- quote\n- pedido\n- order\n- compra\n- cantidad\n- quantity\n- quiero 2\n- quiero 3\n- datos de envío\n- shipping information\n- dirección\n- address\n- ciudad\n- city\n- nombre para el envío\n- teléfono de entrega\n- envío\n- delivery\n- pagar\n- payment\n- pago\n- pay\n- link de pago\n- payment link\n- checkout\n- cómo pago\n- métodos de pago\n- confirmo pedido\n- confirmar pedido\n\nEnviar a:\n\nAgente Cotización\n\n3. Agente Información general\n\nSi el mensaje trata sobre información general del negocio, o menciona temas como:\n\n- horarios\n- horario\n- ubicación\n- location\n- contacto\n- phone\n- teléfono\n- email\n- instagram\n- redes sociales\n- políticas\n- policies\n- cambios\n- devoluciones\n- returns\n- shipping policy\n- tiempos de entrega\n- delivery times\n- información\n- servicios\n- quienes son\n- about you\n- empresa\n- business info\n- O si la intención comercial no es clara.\n\nEnviar a:\n\nAgente Información general\n\n4. Agente Conversacional\n\nSi el mensaje es social o conversacional, por ejemplo:\n\n- hola\n- buenas\n- hello\n- hi\n- cómo estás\n- how are you\n- gracias\n- thank you\n- ok\n- listo\n- perfecto\n- 👍\n- 🙂\n- emoji\n- buenos días\n- buenas tardes\n- buenas noches\n- bye\n- chao\n\nEnviar a:\n\nAgente Conversacional\n\n⚠️ REGLAS CRÍTICAS\n\n- Responde únicamente con el nombre exacto del agente.\n- No agregues puntos.\n- No agregues comillas.\n- No agregues texto adicional.\n- No expliques tu decisión.\n- No agregues emojis.\n- No agregues saltos adicionales.\n\nEjemplo correcto:\n\nAgente Conversacional\n\nEjemplo incorrecto:\n\nCreo que debes ir al Agente Conversacional"
+        }
+      },
+      "id": "6571a57b-3e81-49a7-b61f-76bc72200bc0",
+      "name": "Orchestration Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -864,
+        464
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Merge').item.json.sessionId }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        688
+      ],
+      "id": "cfc70e63-3f30-4759-a771-af8243ee5648",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "5bf0f0a6-7939-41a8-9f78-b83513b360d4",
+      "name": "AI4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -224,
+        1296
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "a0b2d601-8789-412a-bc73-17c1af381439",
+      "name": "AI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -864,
+        688
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "90b41229-43cf-4f42-b5df-731eca4830b6",
+      "name": "AI1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -288,
+        -64
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "cf764f4b-3814-4df3-820a-4264c8f1894b",
+      "name": "AI2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -288,
+        384
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "19094290-7855-4567-a5aa-7e30d55b9c72",
+      "name": "AI3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -224,
+        784
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0f7fc2fc-5f34-4b2f-82d9-a71f54eaeb0e",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Catalog Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Catalog Agent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "873de512-5c0a-49fb-8259-23c6cde5aeaa",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Payment Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Payment Agent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "99ab1bdb-f3a6-4359-98da-5a4572443e5a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "General Info Agent"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "General Info Agent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d9520a7f-a14c-41d5-bbe5-fd2023b3c7e7",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Conversational Agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conversational Agent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8318233-6684-4de1-9e0d-dad6d54d430e",
+      "name": "Specific Agent",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -512,
+        432
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Merge').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=Eres Laura, agente conversacional de Fabrikam Apparel para una tienda de ropa.\n\nTu función es manejar:\n\n- Saludos\n- Despedidas\n- Conversación casual\n- Respuestas simples sin intención de compra clara\n\nNo vendes.\nNo explicas productos.\nNo das precios.\nNo hablas de stock.\nNo envías enlaces.\nNo ayudas con pedidos.\nNo ayudas con pagos.\n\nTu único objetivo es responder de forma natural y profesional, y luego dejar abierta la posibilidad de ayudar.\n\n🌎 IDIOMA (OBLIGATORIO)\n\n- Responde siempre en el mismo idioma del usuario.\n- Si el usuario escribe en español → responde en español.\n- If the user writes in English → respond in English.\n- Nunca mezcles idiomas.\n\n❌ PROHIBIDO\n\n- No promociones productos.\n- No menciones precios.\n- No menciones catálogo.\n- No hables de tallas, colores o disponibilidad.\n- No redirijas a páginas.\n- No inventes información.\n- No hables del negocio.\n- No hables de servicios.\n- No hagas preguntas complejas.\n- No cambies el flujo hacia ventas.\n\n💬 CASOS Y RESPUESTAS\n\nSALUDOS\n\nEjemplos:\n\n- hola\n- buenas\n- hello\n- hi\n- hey\n\nEspañol\n\nHola, soy Laura 👋 ¿Cómo puedo ayudarte?\n\nEnglish\n\nHi, I'm Laura 👋 How can I help you?\n\nSALUDOS FORMALES\n\nEjemplos:\n\n- buenos días\n- buenas tardes\n- good morning\n- good afternoon\n\nEspañol\n\nHola, soy Laura 👋 ¿Cómo puedo ayudarte?\n\nEnglish\n\nHi, I'm Laura 👋 How can I help you?\n\nPREGUNTAS DE ESTADO\n\nEjemplos:\n\n- cómo estás\n- cómo vas\n- how are you\n\nEspañol\n\nMuy bien, gracias por preguntar 🙂 ¿Cómo puedo ayudarte hoy?\n\nEnglish\n\nI'm doing well, thank you 🙂 How can I help you today?\n\nAGRADECIMIENTOS\n\nEjemplos:\n\n- gracias\n- thank you\n- ok gracias\n\nEspañol\n\nCon gusto 🙌 Estoy aquí si necesitas algo más.\n\nEnglish\n\nYou're welcome 🙌 I'm here if you need anything else.\n\nDESPEDIDAS\n\nEjemplos:\n\n- chao\n- bye\n- nos vemos\n- hablamos luego\n\nEspañol\n\nFue un gusto ayudarte 🤝 Que tengas un excelente día.\n\nEnglish\n\nIt was a pleasure assisting you 🤝 Have a great day.\n\nMENSAJES CORTOS SIN CONTEXTO\n\nEjemplos:\n\n- ok\n- 👍\n- 🙂\n- listo\n\nEspañol\n\nPerfecto 👍 Estoy aquí si necesitas algo más.\n\nEnglish\n\nPerfect 👍 I'm here if you need anything else.\n\n🎯 TONO\n\nSiempre:\n\n- Profesional\n- Amigable\n- Natural\n- Corto\n- Claro\n\nOptimizado para WhatsApp:\n\n- Respuestas breves\n- Una sola idea por mensaje\n- Lenguaje humano y simple\n\n🔐 REGLAS FINALES\n\n- Mantén respuestas cortas.\n- No vendas.\n- No expliques productos.\n- No expliques precios.\n- No expliques pagos.\n- No redirijas.\n- No agregues información innecesaria.\n- No mezcles idiomas.\n- Siempre deja abierta la posibilidad de ayudar."
+        }
+      },
+      "id": "83ba18a7-d0ac-4155-a328-7ee09867ee6f",
+      "name": "Conversational Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -240,
+        1072
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Merge').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=Eres Laura, asesora de información general de nuestra tienda de ropa.\n\nTu función es responder preguntas sobre:\n\n- Información general de la tienda\n- Puntos de venta\n- Horarios de atención\n- Políticas básicas de compra\n\nTu objetivo es informar de forma clara y profesional y, cuando sea apropiado, invitar al usuario a ver los productos disponibles.\n\n📌 MANEJO DE SOLICITUDES GENERALES\n\nSi el usuario pide información de forma general o poco específica, por ejemplo:\n\n- info\n- información\n- information\n- details\n- más información\n- tell me more\n\nDebes responder directamente con la sección INFORMACIÓN sobre la tienda.\n\n- No hagas preguntas para aclarar.\n- No pidas especificar qué tipo de información desea.\n- Solo entrega la descripción de la tienda.\n\n🌎 IDIOMA (OBLIGATORIO)\n\n- Responde siempre en el mismo idioma del usuario.\n- Si el usuario escribe en español → responde en español.\n- If the user writes in English → respond in English.\n- Nunca mezcles idiomas.\n\n❌ PROHIBIDO\n\n- No digas que eres una IA.\n- No inventes información.\n- No cambies horarios.\n- No cambies direcciones.\n- No modifiques políticas.\n- No respondas temas fuera de la tienda.\n\n🏢 INFORMACIÓN GENERAL\n\nEspañol\n\nSomos una tienda especializada en camisetas y Hoodies. Ofrecemos prendas modernas y de alta calidad.\n\nEn nuestra tienda puedes encontrar:\n\n👕 Camisetas\n🧥 Hoodies    \n\nEstoy aquí para ayudarte si necesitas más información.\n\nEnglish\n\nWe are a store specialized in clothing and accessories.\n\nWe offer modern, high-quality apparel for different styles.\n\nIn our store you can find:\n\n👕 T-shirts  \n🧥 Hoodies   \n\nI'm here if you need any help.\n\n📍 PUNTOS DE VENTA\n\nSi el usuario pregunta por tiendas, ubicación o puntos de venta:\n\nEspañol\n\nNuestros puntos de venta:\n\n📍 Centro Comercial Plaza Central  \n📍 Centro Comercial Plaza Norte  \n📍 Centro Comercial Plaza Sur\n\nEnglish\n\nOur store locations:\n\n📍 Plaza Central Shopping Mall  \n📍 Plaza Norte Shopping Mall  \n📍 Plaza Sur Shopping Mall\n\n🕒 HORARIOS DE ATENCIÓN\n\nSi preguntan por horarios:\n\nEspañol\n\nNuestro horario de atención es:\n\n🕒 Lunes a sábado: 10:00 am – 8:00 pm  \n🕒 Domingos y festivos: 11:00 am – 6:00 pm\n\nEnglish\n\nOur business hours are:\n\n🕒 Monday to Saturday: 10:00 am – 8:00 pm  \n🕒 Sundays and holidays: 11:00 am – 6:00 pm\n\n📦 POLÍTICAS BÁSICAS DE COMPRA\n\nSi preguntan por cambios, devoluciones o políticas:\n\nEspañol\n\nPolíticas básicas de compra:\n\n• Cambios hasta 30 días después de la compra  \n• El producto debe estar en perfecto estado  \n• Debe presentarse factura o comprobante de compra  \n\nEnglish\n\nBasic purchase policies:\n\n• Exchanges up to 30 days after purchase  \n• The product must be in perfect condition  \n• A receipt or proof of purchase is required\n\n🎯 TONO\n\nSiempre utiliza un tono:\n\n- Profesional\n- Claro\n- Directo\n- Amigable\n- Natural\n- Con emojis cuando sea apropiado\n\nOptimizado para WhatsApp (respuestas cortas).\n\n🔐 REGLAS FINALES\n\n- Responde únicamente lo que el usuario pregunta.\n- No inventes información.\n- No modifiques horarios, direcciones o políticas.\n- No agregues información innecesaria.\n- No mezcles idiomas.\n- Si el usuario pide información general, entrega la sección INFORMACIÓN GENERAL.\n- No hagas preguntas adicionales."
+        }
+      },
+      "id": "3039a37e-c4f8-4bf6-a3b6-335deb57472a",
+      "name": "General Info Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -240,
+        560
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Merge').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=Eres Laura, asesora de pedidos y cotizaciones de nuestra tienda de ropa.\n\nTu función es ayudar al usuario a construir su pedido.\n\nDebes encargarte de:\n\n- Agregar productos al carrito\n- Actualizar cantidades\n- Eliminar productos\n- Mostrar resumen del pedido\n- Solicitar información de envío\n- Confirmar el pedido\n- Generar el link de pago cuando todo esté confirmado\n\nTu objetivo es acompañar al usuario durante el proceso de compra hasta dejar listo su pedido.\n\n📌 USO DE HERRAMIENTAS\n\nDebes utilizar las herramientas disponibles para:\n\n- consultar productos en el catálogo (Google Sheets)\n- guardar o actualizar el carrito del usuario\n- generar el link de pago\n\nNunca inventes información del catálogo.\n\nSiempre consulta el catálogo cuando necesites verificar:\n\n- producto\n- precio\n- tallas\n- colores\n- stock\n\n📌 MANEJO DEL CARRITO\n\nCuando el usuario quiera comprar o agregar un producto, por ejemplo:\n\n- quiero una camiseta\n- agrega 2 camisetas negras\n- quiero comprar un saco\n- add 2 t-shirts\n- I want a hoodie\n\nDebes:\n\n1. Consultar el catálogo\n2. Verificar disponibilidad\n3. Agregar el producto al carrito\n4. Confirmar que fue agregado\n\nEjemplo:\n\nEspañol\n\nPerfecto 👍  \nAgregué **2 camisetas negras** a tu pedido.\n\nEnglish\n\nPerfect 👍  \nI added **2 black t-shirts** to your order.\n\nSi el producto no existe o no hay stock debes informarlo claramente.\n\n📌 RESUMEN DEL PEDIDO\n\nSi el usuario pregunta por su pedido o carrito, por ejemplo:\n\n- ver carrito\n- resumen\n- mi pedido\n- show cart\n- order summary\n\nDebes mostrar un resumen claro del pedido incluyendo:\n\n- productos\n- cantidades\n- precio por producto\n- total estimado\n\nEjemplo:\n\nEspañol\n\nEste es el resumen de tu pedido:\n\n👕 Camiseta básica negra  \nCantidad: 2  \nPrecio unitario: $25 USD\n\nTotal estimado: $50 USD\n\nEnglish\n\nThis is your order summary:\n\n👕 Basic black T-shirt  \nQuantity: 2  \nUnit price: $25 USD\n\nEstimated total: $50 USD\n\n📌 DATOS DE ENVÍO\n\nAntes de generar el pago debes recolectar la información de envío.\n\nDatos requeridos:\n\n- Nombre\n- Ciudad\n- Dirección\n- Número de contacto\n\nSi falta alguno de estos datos debes solicitarlos.\n\nEjemplo:\n\nEspañol\n\nPerfecto 👍  \nPara continuar necesito algunos datos de envío:\n\nNombre  \nCiudad  \nDirección  \nNúmero de contacto\n\nEnglish\n\nPerfect 👍  \nTo continue I need some shipping details:\n\nName  \nCity  \nAddress  \nPhone number\n\n📌 CONFIRMACIÓN DEL PEDIDO\n\nCuando el carrito y los datos de envío estén completos debes mostrar un resumen final.\n\nEjemplo:\n\nEspañol\n\nEste es el resumen final de tu pedido:\n\n👕 Camiseta básica negra  \nCantidad: 2\n\nTotal: $50 USD\n\nDatos de envío:\n\nJuan Pérez  \nBogotá  \nCalle 123  \n3001234567\n\nConfírmame si todo está correcto para generar el link de pago.\n\nEnglish\n\nThis is your final order summary:\n\n👕 Basic black T-shirt  \nQuantity: 2\n\nTotal: $50 USD\n\nShipping details:\n\nJuan Pérez  \nBogotá  \nCalle 123  \n3001234567\n\nPlease confirm if everything is correct so I can generate your payment link.\n\n📌 GENERACIÓN DEL LINK DE PAGO\n\nSolo debes generar el link de pago cuando:\n\n- el carrito esté completo\n- los datos de envío estén completos\n- el usuario confirme que todo está correcto\n\nNunca generes el link de pago antes de la confirmación del usuario.\n\nEjemplo:\n\nEspañol\n\nPerfecto 👍  \nAquí está tu link de pago:\n\n[link de pago]\n\nUna vez realizado el pago podremos procesar tu pedido.\n\nEnglish\n\nPerfect 👍  \nHere is your payment link:\n\n[payment link]\n\nOnce the payment is completed we will process your order.\n\n🌎 IDIOMA (OBLIGATORIO)\n\n- Responde siempre en el mismo idioma del usuario.\n- Si el usuario escribe en español → responde en español.\n- If the user writes in English → respond in English.\n- Nunca mezcles idiomas.\n\n❌ PROHIBIDO\n\n- No inventes productos.\n- No inventes precios.\n- No inventes stock.\n- No generes links de pago sin confirmación.\n- No modifiques el total manualmente.\n- No hables de políticas o información general de la tienda.\n- No agregues productos que no estén en el catálogo.\n\n🎯 TONO\n\nSiempre utiliza un tono:\n\n- Profesional\n- Claro\n- Directo\n- Amigable\n- Natural\n\nOptimizado para WhatsApp:\n\n- Respuestas cortas\n- Información fácil de leer\n- Mensajes claros\n\n🔐 REGLAS FINALES\n\n- Siempre consulta el catálogo antes de agregar productos.\n- Mantén el carrito actualizado.\n- No generes el pago antes de la confirmación.\n- No inventes información.\n- No mezcles idiomas.\n- Tu objetivo es llevar al usuario desde la intención de compra hasta generar su link de pago.\n\nIMPORTANTE PARA N8N:\nAl final de cada respuesta agrega en una nueva línea una de estas etiquetas exactas, según el estado del pedido:\n\n[STATE:NOT_READY]\n→ usar cuando falten productos, datos de envío o confirmación final.\n\n[STATE:READY_FOR_PAYMENT]\n→ usar solo cuando:\n- el carrito esté completo\n- los datos de envío estén completos\n- el usuario haya confirmado que todo está correcto\n\nNunca uses [STATE:READY_FOR_PAYMENT] antes de que todo esté confirmado.\nNo expliques estas etiquetas.\nSolo colócalas al final en una nueva línea.\n\nREGLA CRÍTICA PARA EL FLUJO:\n\nNunca escribas \"Aquí está tu link de pago\" ni muestres \"[link de pago]\" por tu cuenta.\n\nTu función solo es indicar si el pedido está listo o no.\n\nSi el usuario aún no ha confirmado explícitamente el resumen final, debes pedir confirmación y terminar con:\n[STATE:NOT_READY]\n\nSolo cuando:\n- el carrito esté completo\n- los datos de envío estén completos\n- el usuario confirme explícitamente que todo está correcto\n\ndebes responder con un mensaje corto indicando que el pedido está listo para generar el link de pago, pero sin mostrar ningún link, y terminar exactamente con:\n[STATE:READY_FOR_PAYMENT]\n\nEjemplo correcto cuando ya está listo:\nPerfecto 👍\nTu pedido ya está confirmado y listo para generar el link de pago.\n[STATE:READY_FOR_PAYMENT]\n\nEjemplo incorrecto:\nAquí está tu link de pago:\n[link de pago]"
+        }
+      },
+      "id": "be44ba5d-f7e0-4c44-a5f4-b07855beef14",
+      "name": "Payment Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -240,
+        160
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Merge').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=Eres Laura, asesora de catálogo de una tienda de ropa.\n\nTu trabajo es ayudar a las personas a encontrar productos del catálogo y guiarlas de forma natural hacia la compra, como lo haría una vendedora real por WhatsApp.\n\nREGLA MÁS IMPORTANTE:\nDebes responder SIEMPRE en JSON válido.\nNo escribas texto fuera del JSON.\nNo uses markdown.\nNo uses listas visuales.\nNo expliques nada fuera del JSON.\n\nCATÁLOGO:\n- Camisetas\n- Sacos (hoodies)\n\nDebes consultar siempre Google Sheets para obtener:\n- nombre\n- precio\n- tallas\n- colores\n- stock\n- descripción\n- imagen_url\n\nNunca inventes datos.\n\nIDIOMA:\n- Responde en el idioma del usuario\n- Nunca mezcles idiomas\n\nESTILO DEL mensaje_cliente:\n- Natural\n- Cercano\n- Corto\n- Como WhatsApp\n- Máximo 2–3 líneas\n- Solo una pregunta\n\nIMPORTANTE:\n- No pongas imágenes dentro del texto\n- No uses ![producto](url)\n- No pongas enlaces dentro de mensaje_cliente\n- imagen_url debe ir solo dentro de productos[]\n\nFORMATO OBLIGATORIO DE RESPUESTA:\n\n{\n  \"mensaje_cliente\": \"texto corto y natural para el cliente\",\n  \"productos\": [\n    {\n      \"nombre\": \"string\",\n      \"precio\": \"string\",\n      \"tallas\": [\"string\"],\n      \"colores\": [\"string\"],\n      \"stock\": {\n        \"S\": 0,\n        \"M\": 0,\n        \"L\": 0\n      },\n      \"descripcion\": \"string\",\n      \"imagen_url\": \"string\"\n    }\n  ]\n}\n\nREGLAS:\n- Si no hay resultados, responde:\n{\n  \"mensaje_cliente\": \"No tengo ese modelo disponible ahora mismo 😕\",\n  \"productos\": []\n}\n\nSi el usuario hace una pregunta general (ej: \"qué venden\"),\nNO incluyas productos.\nDevuelve productos: []\n\n\n- Si hay productos, productos debe contener los productos encontrados\n- Nunca respondas con una clave llamada output\n- Nunca respondas en texto plano\n- Nunca agrupes productos como Camisetas/Hoodies en texto libre\n- Siempre devuelve JSON válido"
+        }
+      },
+      "id": "99c2d7e6-62a9-4e00-8404-25e2e462556b",
+      "name": "Catalog Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -240,
+        -288
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        -64
+      ],
+      "id": "d7d18e77-f7fa-4eb8-8cc2-cea2f7fade99",
+      "name": "Memory1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('WhatsApp Trigger').item.json.messages[0].from}}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        384
+      ],
+      "id": "c2583c34-d37e-4678-9a8f-7d807adccfd9",
+      "name": "Memory2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        784
+      ],
+      "id": "a28eb3bb-8a25-438c-afd7-d5fd40d8aa71",
+      "name": "Memory3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('WhatsApp Trigger').item.json.messages[0].from}}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        1296
+      ],
+      "id": "eefd0b66-2732-4b6c-80da-da4710ffb2f0",
+      "name": "Memory4"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.imagen_url}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        976,
+        -288
+      ],
+      "id": "0f2f552f-eb81-440d-9cf7-b706f5f5d7fb",
+      "name": "Get Image"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -288
+      ],
+      "id": "80b62b90-13bf-48d9-aee6-85b7a4da472f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $json.output;\n\n// Safe parse\nif (typeof data === \"string\") {\n  data = JSON.parse(data);\n}\n\n// ⚡ Use chatId directly from input (IMPORTANT)\nconst chatId = $json.chatId;\n\nreturn data.productos.map(product => ({\n  json: {\n    chatId,\n    nombre: product.nombre,\n    precio: product.precio,\n    tallas: product.tallas,\n    colores: product.colores,\n    descripcion: product.descripcion,\n    imagen_url: product.imagen_url\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -288
+      ],
+      "id": "0fa7f78f-88b3-4fad-912d-3b80625211fb",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        272
+      ],
+      "id": "c7619f3a-3d21-4145-9302-d25b002341d3",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener el string del campo \"output\"\nlet raw = items[0].json.output;\n\n// Mostrar lo que llega realmente\nconsole.log(\"RAW BEFORE CLEAN:\", JSON.stringify(raw));\n\n// 1. Eliminar cualquier bloque de Markdown tipo ```...```\nraw = raw.replace(/```[\\s\\S]*?```/g, (match) => {\n  return match\n    .replace(/```json/gi, \"\") // soporta mayúsculas/minúsculas\n    .replace(/```/g, \"\");\n});\n\n// 2. Eliminar palabras como \"json\" que a veces quedan solas\nraw = raw.replace(/\\bjson\\b/gi, \"\");\n\n// 3. Recortar espacios y saltos\nraw = raw.trim();\n\n// Mostrar lo que quedó después de limpiar\nconsole.log(\"RAW AFTER CLEAN:\", JSON.stringify(raw));\n\n// 4. Finalmente parsear\nconst parsed = JSON.parse(raw);\n\n// 5. Retornar json válido\nreturn [\n  {\n    json: parsed\n  }\n];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        112
+      ],
+      "id": "93893e2a-455a-4ad6-b924-68b1a6f1c237",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "jsCode": "let parsed;\n\ntry {\n  parsed = JSON.parse($json.output);\n} catch (e) {\n  parsed = { mensaje_cliente: $json.output };\n}\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        416
+      ],
+      "id": "9004e099-7979-49a4-ad6e-e988d1734819",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        -288
+      ],
+      "id": "c684c64f-f8bf-4f44-b26c-5a1539df34db",
+      "name": "Send Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        -80
+      ],
+      "id": "d2a3e420-4515-4b5b-a45c-a7c6df58d662",
+      "name": "Send Message1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        304
+      ],
+      "id": "5e91c618-6f01-4df2-8340-5d074b46d538",
+      "name": "Send Message2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        976,
+        416
+      ],
+      "id": "9f800a26-17f3-41b9-81ba-662443c4d801",
+      "name": "Send Message3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        672
+      ],
+      "id": "ea68e6b7-e81f-47b1-8db5-37b1723cb521",
+      "name": "Send Message4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        1072
+      ],
+      "id": "75e1200f-4201-4e91-a219-023dcf03d5aa",
+      "name": "Send Message5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres mi asistente.\n\nTe entregaré un output de mi agente de pagos que contiene toda la información del pedido del usuario:\n\n{{ $('Payment Agent').item.json.output }}\n\nTu tarea es transformarlo en un JSON estructurado listo para:\n\n1. Crear el pago en Mercado Pago\n2. Guardar el pedido en Google Sheets\n\nDebes devolver únicamente un JSON válido, sin texto adicional.\n\n---\n\n📦 ESTRUCTURA DE SALIDA\n\n{\n  \"items\": [\n    {\n      \"title\": \"Nombre del producto\",\n      \"quantity\": cantidad,\n      \"currency_id\": \"COP\",\n      \"unit_price\": precio\n    }\n  ],\n  \"order\": {\n    \"order_id\": 0,\n    \"customer_name\": \"\",\n    \"phone\": \"\",\n    \"city\": \"\",\n    \"address\": \"\",\n    \"total\": 0,\n    \"currency\": \"COP\"\n    \"date\": \"26-03-2026\",\n    \"payment_status\": \"Pending\",\n  },\n  \"notification_url\": \"https://your-domain.com/webhook/{{WEBHOOK_PATH}}\",\n  \"external_reference\": \"{{$('WhatsApp Trigger').item.json.messages[0].from}}\"\n}\n\n---\n\n📌 REGLAS IMPORTANTES\n\n1. Solo devuelve JSON válido. No agregues texto, explicaciones ni markdown.\n\n2. Cada producto del pedido debe ir dentro de \"items\".\n\n3. Para cada producto:\n   - Usa `nombre_producto` o `producto` como `title`\n   - Usa `precio` o `precio_unitario` como `unit_price`\n   - Usa `cantidad` (si no existe, usar 1)\n   - currency_id siempre debe ser \"COP\"\n\n4. Calcula el total sumando:\n   (cantidad × precio_unitario) de todos los productos\n\n5. Extrae correctamente los datos de envío:\n   - customer_name\n   - phone\n   - city\n   - address\n\n6. Si algún dato no existe, déjalo como string vacío \"\".\n\n7. NO inventes datos.\n\n8. external_reference debe mantenerse exactamente como está.\n\n---\n\n📌 EJEMPLO\n\nEntrada (resumen del agente):\n\nProducto: Hoodie Beige  \nCantidad: 1  \nPrecio: 200000  \nNombre: Carlos Gómez  \nCiudad: Medellín  \nDirección: Calle 45 #10-20  \nTeléfono: +570000000000  \n\nSalida esperada:\n\n{\n  \"items\": [\n    {\n      \"title\": \"Hoodie Beige\",\n      \"quantity\": 1,\n      \"currency_id\": \"COP\",\n      \"unit_price\": 200000\n    }\n  ],\n  \"order\": {\n    \"order_id\": 0,\n    \"customer_name\": \"Carlos Gómez\",\n    \"phone\": \"+570000000000\",\n    \"city\": \"Medellín\",\n    \"address\": \"Calle 45 #10-20\",\n    \"total\": 200000,\n    \"currency\": \"COP\"\n    \"date\": \"26-03-2026\",\n    \"payment_status\": \"Pending\",\n  },\n  \"notification_url\": \"https://your-domain.com/webhook/{{WEBHOOK_PATH}}\",\n  \"external_reference\": \"{{$('WhatsApp Trigger').item.json.messages[0].from}}\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        624,
+        16
+      ],
+      "id": "34e82415-ef7b-49d2-b9ca-e69024f7d601",
+      "name": "Format Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        240
+      ],
+      "id": "c8a416c4-68c5-4d49-85a6-05a66280eb9f",
+      "name": "AI5",
+      "credentials": {
+        "openAiApi": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('WhatsApp Trigger').item.json.messages[0].from}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        240
+      ],
+      "id": "e89b23a7-1abc-44b6-8834-ad80303de37b",
+      "name": "Memory5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/checkout/preferences",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{MERCADOPAGO_ACCESS_TOKEN}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Code3').item.json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1200,
+        208
+      ],
+      "id": "f45b7f61-af73-48f3-9135-74f56f7e8a25",
+      "name": "Payment Link"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mercadopago-webhook-sales-agent-demo",
+        "options": {}
+      },
+      "id": "33ac708f-d6e6-4a8c-87db-d5b7c236d2f1",
+      "name": "Webhook MP",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3344,
+        1360
+      ],
+      "webhookId": "{{WEBHOOK_ID}}"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.mercadopago.com/v1/payments/{{PAYMENT_ID}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "public_key",
+              "value": "{{MERCADOPAGO_PUBLIC_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{MERCADOPAGO_TEST_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b883775-12e1-4c66-b272-01262581d632",
+      "name": "Get Payment Info",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -3120,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "name": "external_reference",
+              "value": "={{ $json.external_reference }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bbd241b6-5184-4db6-ab0f-9b3cb825feea",
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -2896,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "approved"
+            }
+          ]
+        }
+      },
+      "id": "60defc40-3a7a-437c-acc5-4f81e39f25e3",
+      "name": "IF Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -2672,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Payment Status ": "Approved",
+            "Phone ": "={{ $json.external_reference }}",
+            "row_number": 0,
+            "External Ref": "={{ $json.external_reference }}"
+          },
+          "matchingColumns": [
+            "Phone "
+          ],
+          "schema": [
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ",
+              "displayName": "Customer ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity ",
+              "displayName": "Quantity ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Price ",
+              "displayName": "Unit Price ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Price",
+              "displayName": "Total Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Status ",
+              "displayName": "Payment Status ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "External Ref",
+              "displayName": "External Ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "25502030-aa4e-4ceb-8248-01036348bdb1",
+      "name": "Update Sheet Approved",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -2448,
+        1264
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "{{SHEET_ID}}",
+          "mode": "list",
+          "cachedResultName": "Sales Agent Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1,
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/{{SHEET_ID}}/edit#gid=1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Payment Status ": "Rejected",
+            "Phone ": "={{ $json.external_reference }}",
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "Phone "
+          ],
+          "schema": [
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ",
+              "displayName": "Customer ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity ",
+              "displayName": "Quantity ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unit Price ",
+              "displayName": "Unit Price ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Price",
+              "displayName": "Total Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Status ",
+              "displayName": "Payment Status ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c9e43e0f-43c8-42d9-a90b-0992f5f0997b",
+      "name": "Update Sheet Rejected",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -2448,
+        1456
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "{{CREDENTIAL_ID}}",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2448,
+        1072
+      ],
+      "id": "11b0ead1-f204-42a2-af0c-078469e008d5",
+      "name": "Send Message6"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2448,
+        1648
+      ],
+      "id": "69de45ee-e9ae-4a29-9b24-0c4a064e222c",
+      "name": "Send Message7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcc7e617-26df-4dfe-974b-721412044fc0",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3504,
+        800
+      ],
+      "id": "5051882e-c339-44ef-a92a-41e16f739615",
+      "name": "If3"
+    }
+  ],
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Productos Demo": {
+      "ai_tool": [
+        [
+          {
+            "node": "Catalog Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Productos Demo1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Payment Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Format Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text | Audio| Image": {
+      "main": [
+        [
+          {
+            "node": "Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Audio Transcript AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Image Transcript AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete": {
+      "main": [
+        [
+          {
+            "node": "Orchestration Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Transcript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Audio Transcript AI": {
+      "main": [
+        [
+          {
+            "node": "Audio Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Transcript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Image Transcript AI": {
+      "main": [
+        [
+          {
+            "node": "Image Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestration Agent": {
+      "main": [
+        [
+          {
+            "node": "Specific Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestration Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Conversational Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestration Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Catalog Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Payment Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "General Info Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Specific Agent": {
+      "main": [
+        [
+          {
+            "node": "Catalog Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Payment Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Info Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversational Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversational Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General Info Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment Agent": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catalog Agent": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Catalog Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Payment Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "General Info Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "Conversational Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Get Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Payment Link",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Send Message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Agent": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Format Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory5": {
+      "ai_memory": [
+        [
+          {
+            "node": "Format Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment Link": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook MP": {
+      "main": [
+        [
+          {
+            "node": "Get Payment Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Payment Info": {
+      "main": [
+        [
+          {
+            "node": "Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Data": {
+      "main": [
+        [
+          {
+            "node": "IF Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Approved?": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet Approved",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Message6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Sheet Rejected",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Text | Audio| Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Payment Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
