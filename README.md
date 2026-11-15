@@ -32,6 +32,7 @@ This repository collects production-style workflows I've built in **n8n** and **
 | [Vapi Call Result AI Qualification](make/vapi-call-result-ai-qualification/) | Summarizes call transcripts with OpenAI and classifies leads as qualified or not (part 2) | Vapi, OpenAI, HTTP |
 | [Voice Agent Calendar Availability Check](make/voice-agent-calendar-availability-check/) | Live tool for a voice agent that checks Google Calendar availability mid-call | Bland AI, Google Calendar |
 | [Bland AI Bilingual Lead Callback](make/bland-ai-bilingual-lead-callback/) | Instantly calls new leads with a French or English AI voice pathway | Bland AI |
+| [ClickUp Task to Zoom Meeting Link](make/clickup-task-zoom-meeting-link/) | Creates a Zoom meeting from a ClickUp checkbox and writes the link back to the task | ClickUp, Zoom |
 
 ## Data Privacy
 

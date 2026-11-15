@@ -1,0 +1,127 @@
+{
+  "name": "ClickUp Task to Zoom Meeting Link",
+  "flow": [
+    {
+      "id": 8,
+      "module": "clickup:watchTasksPolling",
+      "version": 2,
+      "parameters": {
+        "tags": [],
+        "limit": 20,
+        "watch": "all",
+        "team_id": "{{CLICKUP_TEAM_ID}}",
+        "statuses": [],
+        "subtasks": true,
+        "assignees": [],
+        "space_ids": [
+          "{{CLICKUP_SPACE_ID_1}}",
+          "{{CLICKUP_SPACE_ID_2}}"
+        ],
+        "__IMTCONN__": "{{CLICKUP_CONNECTION_ID}}"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "zoom-user:createMeeting",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "{{ZOOM_USER_CONNECTION_ID}}"
+      },
+      "filter": {
+        "name": "Trigger on Zoom Link Request",
+        "conditions": [
+          [
+            {
+              "a": "{{8.custom_fields.`Generate Zoom Link`}}",
+              "b": "true",
+              "o": "boolean:equal"
+            },
+            {
+              "a": "{{8.custom_fields.Type}}",
+              "b": "1",
+              "o": "text:notequal"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "type": 2,
+        "topic": "{{8.name}}",
+        "agenda": "{{8.description}}",
+        "duration": "200",
+        "settings": {
+          "audio": "both",
+          "approval_type": 0,
+          "auto_recording": "none"
+        },
+        "timezone": "America/New_York",
+        "start_time": "{{8.date_created}}",
+        "join_before_host": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 359,
+          "y": 2
+        }
+      }
+    },
+    {
+      "id": 10,
+      "module": "clickup:editATask",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": "{{CLICKUP_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "name": "{{8.name}}",
+        "content": "Zoom Link: {{2.join_url}}\nPassword: {{2.password}}",
+        "list_id": "{{CLICKUP_LIST_ID}}",
+        "task_id": "{{8.id}}",
+        "team_id": "{{CLICKUP_TEAM_ID}}",
+        "space_id": "{{CLICKUP_SPACE_ID_1}}",
+        "assignees": {},
+        "folder_id": "{{CLICKUP_FOLDER_ID}}",
+        "custom_fields": {
+          "e1df3e48-4bb9-4a63-9604-5f272a2a02c3": "d897a3ec-f965-4fa4-adf7-3856b7400dca",
+          "e9c8fb23-8e5a-4b40-af0f-c038afafe12f": "9943c635-e352-4355-a7c7-4d67016389f6"
+        },
+        "addCustomFieldDateTime": false,
+        "parseCustomFieldDateTimeOutput": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 703,
+          "y": -2
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
