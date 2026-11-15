@@ -1,0 +1,262 @@
+{
+  "name": "Real Estate Lead Round-Robin Assignment",
+  "flow": [
+    {
+      "id": 1,
+      "module": "airtable:TriggerWatchRecords",
+      "version": 3,
+      "parameters": {
+        "base": "{{AIRTABLE_BASE_ID}}",
+        "view": "",
+        "table": "{{LEADS_TABLE_ID}}",
+        "config": {
+          "labelField": "Email",
+          "triggerField": "Created at"
+        },
+        "formula": "",
+        "maxRecords": 1,
+        "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}",
+        "useColumnId": false
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "airtable:ActionSearchRecords",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "base": "{{AIRTABLE_BASE_ID}}",
+        "sort": [
+          {
+            "field": "Last assigned at",
+            "direction": "asc"
+          }
+        ],
+        "table": "{{AGENTS_TABLE_ID}}",
+        "formula": "AND({Status} = \"Available\", {Notion User ID} != \"\")\n ",
+        "maxRecords": "1",
+        "useColumnId": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "airtable:ActionUpdateRecords",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "id": "{{1.id}}",
+        "base": "{{AIRTABLE_BASE_ID}}",
+        "table": "{{LEADS_TABLE_ID}}",
+        "record": {
+          "fld4EiUiWwloOAwIh": {},
+          "{{ASSIGNED_AGENT_FIELD_ID}}": "{{2.id}}"
+        },
+        "typecast": false,
+        "useColumnId": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "airtable:ActionUpdateRecords",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": "{{AIRTABLE_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "id": "{{2.id}}",
+        "base": "{{AIRTABLE_BASE_ID}}",
+        "table": "{{AGENTS_TABLE_ID}}",
+        "record": {
+          "{{LAST_ASSIGNED_AT_FIELD_ID}}": "{{timestamp}}",
+          "fldztrnXnzKfxQ3Mu": {}
+        },
+        "typecast": false,
+        "useColumnId": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 7,
+      "module": "notion:createAPage",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "{{NOTION_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "fields": {
+          "MWTM": "{{3.`First Name`}}",
+          "title": "{{3.`Lead Source`[]}}",
+          "%7DtGK": "{{3.`Last  Name`}}",
+          "YQC%3F": "New Lead",
+          "fni%3C": "{{3.`Open House Full Address`}}",
+          "nym%60": {
+            "includeTime": false
+          },
+          "yl%40Y": "{{3.Email}}",
+          "g%7B*%7C": "{{3.Phone}}",
+          "w%40%3EJ": "{{2.`Notion User ID`}}"
+        },
+        "select": "list",
+        "database": "{{NOTION_DB_ID}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 8,
+      "module": "follow-up-boss:ActionCreateContact",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "{{FOLLOW_UP_BOSS_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "stage": "Lead",
+        "emails": [
+          {
+            "type": "home",
+            "value": "{{1.Email}}"
+          }
+        ],
+        "phones": [
+          {
+            "type": "home",
+            "value": "{{3.Phone}}"
+          }
+        ],
+        "source": "Airtable Form",
+        "lastName": "{{3.`Last  Name`}}",
+        "contacted": false,
+        "firstName": "{{3.`First Name`}}",
+        "deduplicate": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 9,
+      "module": "justcall:createContact",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": "{{JUSTCALL_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "email": "{{1.Email}}",
+        "phone": "{{1.Phone}}",
+        "lastname": "{{1.`Last  Name`}}",
+        "firstname": "{{1.`First Name`}}",
+        "acrossteam": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        }
+      },
+      "onerror": [
+        {
+          "id": 10,
+          "module": "builtin:Ignore",
+          "version": 1,
+          "filter": {
+            "name": "Catch all",
+            "conditions": []
+          },
+          "metadata": {
+            "designer": {
+              "x": 2100,
+              "y": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": [
+      {
+        "moduleIds": [
+          4
+        ],
+        "content": "<p>Update the column \"Last assigned at\" to \"now\"</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          3
+        ],
+        "content": "<p>Assign the agent to the lead by updating the column \"Assigned agent\"</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      },
+      {
+        "moduleIds": [
+          2
+        ],
+        "content": "<p>Get the available agent with the longest idle time</p>",
+        "isFilterNote": false,
+        "metadata": {
+          "color": "#9138FE"
+        }
+      }
+    ]
+  }
+}
