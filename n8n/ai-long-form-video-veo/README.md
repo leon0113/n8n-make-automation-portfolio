@@ -6,6 +6,8 @@
 
 Veo creates only short clips, but ads need around 30 seconds. This workflow turns one topic from a Google Sheet into a complete marketing package (script, title, description, hashtags), then generates a 4-scene video and stitches it into a single 30-second ad with subtitles.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — manual run (or Google Sheets trigger) picks the next unprocessed row.

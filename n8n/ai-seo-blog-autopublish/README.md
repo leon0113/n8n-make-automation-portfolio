@@ -6,6 +6,8 @@
 
 Publishing SEO content every week needs a writer, an editor, and someone to source images. This workflow pulls the next target keyword from a website's API, writes a long-form SEO article with GPT-4o, adds meta tags and a stock image, and saves it as a draft blog post for human review.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — weekly cron (Mondays 9 AM) or an on-demand "Run Now" webhook from an admin dashboard.
@@ -25,6 +27,28 @@ n8n, OpenAI (GPT-4o, GPT-4o-mini), Pexels API, Custom REST API, Slack
 - Two-model setup: a stronger model writes the article, a cheaper model handles metadata
 - Defensive output cleanup (markdown fences, BOM, stray quotes) before publishing
 - Human-in-the-loop: posts land as drafts and a Slack alert links to the review dashboard
+
+## Results
+
+**Keyword queue in the admin dashboard (the workflow pulls the next pending keyword)**
+
+![Keyword queue in the admin dashboard (the workflow pulls the next pending keyword)](screenshots/keyword-queue.png)
+
+**AI-generated drafts land here for human review before publishing**
+
+![AI-generated drafts land here for human review before publishing](screenshots/draft-review.png)
+
+**Run Now button and schedule settings that call the workflow**
+
+![Run Now button and schedule settings that call the workflow](screenshots/automation-settings.png)
+
+**Published articles on the blog**
+
+![Published articles on the blog](screenshots/blog-page.png)
+
+**A generated article with its Pexels thumbnail**
+
+![A generated article with its Pexels thumbnail](screenshots/published-article.png)
 
 ## Setup
 

@@ -6,6 +6,8 @@
 
 New leads go cold fast if nobody calls them. This workflow reads queued leads from Google Sheets and has a Retell AI voice agent call each one automatically, passing the lead's name into the conversation. It's part 1 of a two-workflow AI calling system. Call results and bookings are handled by [AI Voice Call Handler](../ai-voice-call-handler-ghl-booking/).
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — manual run (or the included schedule trigger) reads the lead list from Google Sheets.

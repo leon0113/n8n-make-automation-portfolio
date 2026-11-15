@@ -6,6 +6,8 @@
 
 Agencies receive bug reports and change requests from clients over WhatsApp, and they get lost in chat. This AI intake assistant understands each message (text, voice note, screenshot, or document), asks clarifying questions when needed, and turns it into a properly assigned ClickUp task with a Slack alert.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — the WhatsApp Business webhook receives the client message, and a router branches by type: text, audio, image, or document.

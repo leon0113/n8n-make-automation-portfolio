@@ -6,6 +6,8 @@
 
 Cold outreach converts better when it opens with real value. This workflow audits each lead's website with AI, finds missing automation opportunities (chat, online booking, lead capture), and produces a branded HTML/PDF report plus a personalized 3-email follow-up sequence.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — every 15 minutes, reads leads with status `pending` from Google Sheets and processes them one at a time with a polite delay.

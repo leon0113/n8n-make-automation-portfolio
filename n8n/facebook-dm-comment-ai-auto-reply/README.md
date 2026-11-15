@@ -6,6 +6,8 @@
 
 Businesses miss leads when Facebook comments and DMs go unanswered. This workflow replies to public comments and private messages (Facebook and Instagram) with AI, qualifies the visitor, collects their contact details, and logs everything to a Supabase CRM.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — Meta webhook receives comment and DM events (GET request handles webhook verification).

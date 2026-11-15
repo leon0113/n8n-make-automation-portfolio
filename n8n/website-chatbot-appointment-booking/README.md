@@ -6,6 +6,8 @@
 
 Website visitors leave when nobody answers their questions, and many are ready to book a consultation right away. This multi-agent chatbot answers FAQs about a real estate brokerage, collects lead details, and books appointments, while keeping context across visits.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — the website chat widget sends each message and session ID to a webhook.
@@ -26,6 +28,12 @@ n8n, OpenAI (GPT-4o-mini), Google Gemini, Cal.com API, Custom REST API (chat his
 - Step-by-step lead capture with email and phone validation
 - Structured data extraction on every turn, so no lead details are lost
 - Cal.com availability and booking tools available to the agent
+
+## Results
+
+**Chat widget collecting lead details and sharing the booking link (test data)**
+
+![Chat widget collecting lead details and sharing the booking link (test data)](screenshots/chat-widget-demo.png)
 
 ## Setup
 

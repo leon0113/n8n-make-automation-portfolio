@@ -6,6 +6,8 @@
 
 An AI phone agent is only useful if it can check real availability, book real appointments, and log every call in the CRM. This webhook is the backend of a Retell AI voice agent. It answers live function calls during the conversation and syncs results to GoHighLevel after the call ends. It's part 2 of the system that starts with [AI Voice Outbound Lead Dispatcher](../ai-voice-outbound-lead-dispatcher/).
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — a single webhook receives Retell events and live tool calls, and a switch routes them by type.

@@ -6,6 +6,8 @@
 
 Leads that arrive by email often never make it into the CRM. This workflow watches a Gmail inbox, uses GPT-4o to pull the lead's details out of each real customer email, and creates or updates the matching contact in GoHighLevel with an AI summary.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — Gmail polls every minute for unread emails, excluding no-reply, notification, and bounce senders.

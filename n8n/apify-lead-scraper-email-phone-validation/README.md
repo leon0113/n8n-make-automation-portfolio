@@ -6,6 +6,8 @@
 
 Scraped lead lists are often full of dead numbers and missing emails. This workflow scrapes local businesses from Google Maps through Apify, finds an email on each business's website, validates the phone line type, scores every lead, and saves a call-ready list to Google Sheets.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — a webhook receives the search terms, location, lead count, and API config (with safe defaults).

@@ -6,6 +6,8 @@
 
 Talking-head videos perform well on social media, but filming them daily isn't realistic. This workflow writes a short ad script with AI, gets a human to approve it in Slack, renders it as a HeyGen AI-avatar video, and publishes it to Instagram, Facebook, TikTok, and YouTube through Blotato.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — manual run reads the next unprocessed title from Google Sheets.

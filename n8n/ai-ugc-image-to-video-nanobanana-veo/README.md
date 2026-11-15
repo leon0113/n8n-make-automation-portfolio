@@ -6,6 +6,8 @@
 
 UGC-style ads (a real-looking person using the product) convert well but are expensive to shoot. This workflow takes a plain product photo from a Google Sheet and produces a lifestyle UGC image with Nano Banana (Gemini 2.5 Flash Image), then animates it into a short video ad with Veo 3.1.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — manual run reads product rows (image URL, name, offer) from Google Sheets and loops through them one at a time.
@@ -26,6 +28,20 @@ n8n, OpenAI (GPT-4o-mini Vision), Google Vertex AI (Gemini 2.5 Flash Image "Nano
 - Prompts and output URLs stored per row for review and reuse
 - Async polling loop for Veo's long-running jobs
 - Includes disabled alternative nodes (DALL-E 3 path, direct URL download) for experimentation
+
+## Results
+
+**Example product input**
+
+![Example product input](screenshots/product-input-bag.png)
+
+**Example product input**
+
+![Example product input](screenshots/product-input-earbuds.jpg)
+
+**Generated UGC lifestyle image (Nano Banana)**
+
+![Generated UGC lifestyle image (Nano Banana)](screenshots/ugc-output.png)
 
 ## Setup
 

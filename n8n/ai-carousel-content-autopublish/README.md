@@ -6,6 +6,8 @@
 
 Designing educational carousels by hand takes hours per post. This workflow takes a topic from a Google Sheet, writes a complete carousel with GPT, generates a branded image for every slide with Gemini, and publishes it to Instagram, LinkedIn, and Facebook through Blotato.
 
+![Workflow canvas](screenshots/workflow.png)
+
 ## How It Works
 
 1. Trigger — daily schedule (or manual run) reads topics from Google Sheets and picks one row whose status is empty.
