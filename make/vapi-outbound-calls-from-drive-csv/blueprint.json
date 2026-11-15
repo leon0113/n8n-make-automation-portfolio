@@ -1,0 +1,181 @@
+{
+  "name": "Vapi AI Outbound Calls from Google Drive CSV",
+  "flow": [
+    {
+      "id": 35,
+      "module": "google-drive:watchFilesInAFolder",
+      "version": 4,
+      "parameters": {
+        "limit": 1,
+        "select": "create",
+        "folderId": "/{{DRIVE_FOLDER_ID}}",
+        "mimeType": "all",
+        "__IMTCONN__": "{{GOOGLE_DRIVE_CONNECTION_ID}}",
+        "destination": "drive"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 36,
+      "module": "google-drive:getAFile",
+      "version": 4,
+      "parameters": {
+        "__IMTCONN__": "{{GOOGLE_DRIVE_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "file": "{{35.id}}",
+        "select": "map",
+        "formatDrawings": "image/jpeg",
+        "formatDocuments": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "formatSpreadsheets": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "formatPresentations": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 37,
+      "module": "regexp:Replace",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "text": "{{36.data}}",
+        "value": ",",
+        "global": true,
+        "pattern": "\\t",
+        "multiline": false,
+        "sensitive": true,
+        "singleline": false
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Clean CSV Text"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "module": "csv:ParseCSV",
+      "version": 1,
+      "parameters": {
+        "relax": false,
+        "colCount": null,
+        "delimiter": ",",
+        "csvHeaders": "full_name,phone,email,lead_status",
+        "delimiterType": "other",
+        "csvContainsHeaders": true
+      },
+      "mapper": {
+        "csv": "{{37.text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 32,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{30.col2}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 43,
+      "module": "vapi:createOutboundPhoneCall2",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": "{{VAPI_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "select": "customer",
+        "customer": {
+          "number": "+{{30.col2}}"
+        },
+        "assistantId": "{{VAPI_ASSISTANT_ID}}",
+        "phoneNumberId": "{{VAPI_PHONE_NUMBER_ID}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 48,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "duration": "150"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 44,
+      "module": "vapi:getCall",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": "{{VAPI_CONNECTION_ID}}"
+      },
+      "mapper": {
+        "id": "{{43.id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
